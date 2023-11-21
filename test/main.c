@@ -6,6 +6,7 @@
 #include "../src/lexer.h"
 #include "../src/ast_builder.h"
 #include "../src/token.h"
+#include "../src/ast_evaluate.h"
 
 DESCRIBE("read_tokens", {
     TEST("reads 1 & 0",{
@@ -41,5 +42,43 @@ DESCRIBE("read_tokens", {
         Node right = new_leaf(VALUE_OFF);
         Node node = new_node(&left, &right, COMBINATOR_AND);
         print_tree(node);
+    })
+    TEST("evaluates leaf",{
+        Node node = new_leaf(VALUE_ON);
+        Value value = evaluate_node(&node);
+        ASSERT_EQUALS(value, VALUE_ON);
+    })
+    TEST("evaluates flat fork",{
+        Node left = new_leaf(VALUE_ON);
+        Node right = new_leaf(VALUE_OFF);
+        Node node = new_node(&left, &right, COMBINATOR_AND);
+        Value value = evaluate_node(&node);
+        ASSERT_EQUALS(value, VALUE_OFF);
+    })
+    TEST("evaluates nested fork (left is leaf)",{
+        Node left = new_leaf(VALUE_ON);
+
+        Node left_d1 = new_leaf(VALUE_OFF);
+        Node right_d1 = new_leaf(VALUE_ON);
+
+        Node node_d1 = new_node(&left_d1, &right_d1, COMBINATOR_OR);
+
+        Node node = new_node(&left, &node_d1, COMBINATOR_AND);
+
+        Value value = evaluate_node(&node);
+        ASSERT_EQUALS(value, VALUE_ON);
+    })
+    TEST("evaluates nested fork (right is leaf)",{
+        Node right = new_leaf(VALUE_ON);
+
+        Node left_d1 = new_leaf(VALUE_ON);
+        Node right_d1 = new_leaf(VALUE_ON);
+
+        Node node_d1 = new_node(&left_d1, &right_d1, COMBINATOR_AND);
+
+        Node node = new_node(&node_d1, &right, COMBINATOR_AND);
+
+        Value value = evaluate_node(&node);
+        ASSERT_EQUALS(value, VALUE_ON);
     })
 })
