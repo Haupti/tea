@@ -13,9 +13,13 @@ int size(Cursor * it){
     return it->end-it->start+1;
 }
 
+void print_cursor(Cursor * it){
+    printf("Cursor (size %d) { arr: %p, start: %d, end: %d, position: %d }\n", size(it), it->arr, (int) it->start, (int) it->end, it->position);
+}
+
 Token next(Cursor * it){
     if(it->end < (it->position + 1)){
-        puts("index out of bounds");
+        puts("cursor next: index out of bounds");
         exit(EXIT_FAILURE);
     }
     it->position += 1;
@@ -24,7 +28,7 @@ Token next(Cursor * it){
 
 Token prev(Cursor * it){
     if(it->start < (it->position - 1)){
-        puts("index out of bounds");
+        puts("cursor prev: index out of bounds");
         exit(EXIT_FAILURE);
     }
     it->position -= 1;
@@ -37,16 +41,12 @@ Cursor copy_cursor(Cursor * original){
 }
 
 Token current(Cursor * it){
-    if(it->end == 0){
-        puts("iterator empty");
-        exit(EXIT_FAILURE);
-    }
     return it->arr[(it->position)];
 }
 
 Cursor new_cursor(Token * arr, size_t start, size_t end){
     if(start > end){
-        puts("cursor start after cursor end");
+        puts("cursor create: start after end");
         exit(EXIT_FAILURE);
     }
     Cursor it = {arr, start, end, start};
@@ -63,7 +63,7 @@ int has_prev(Cursor * it){
 
 void jump_to(Cursor * it, int pos){
     if(it->end < pos){
-        puts("index out of bounds");
+        puts("cursor jump: index out of bounds");
         exit(EXIT_FAILURE);
     }
     it->position = pos;

@@ -21,5 +21,6 @@ int has_next(Cursor * it);
 int has_prev(Cursor * it);
 void jump_to(Cursor * it, int pos);
 Token start(Cursor * it);
+void print_cursor(Cursor * it);
 
 #endif
