@@ -4,10 +4,12 @@
 #include "assert.h"
 
 #include "../src/lexer.h"
+#include "../src/interpreter.h"
+#include "../src/token.h"
 
 DESCRIBE("read_tokens", {
     TEST("reads 1 & 0",{
-        TokenType tokens[5];
+        Token tokens[5];
         int count = read_tokens(tokens, "1 & 0", 5);
         ASSERT_EQUALS(count,3);
         char show[20];
@@ -19,7 +21,7 @@ DESCRIBE("read_tokens", {
         ASSERT_STR_EQUALS(show,"OFF");
     })
     TEST("reads (1 & 0) | 1)",{
-        TokenType tokens[5];
+        Token tokens[5];
         int count = read_tokens(tokens, "(1 & 0) | 1", 11);
         ASSERT_EQUALS(count,7);
         char show[20];
@@ -29,5 +31,15 @@ DESCRIBE("read_tokens", {
         ASSERT_STR_EQUALS(show,"GRP_CLOSE");
         show_token(show, &tokens[5]);
         ASSERT_STR_EQUALS(show,"OR");
+    })
+    TEST("prints leaf",{
+        Node node = new_leaf(VALUE_ON);
+        print_tree(node);
+    })
+    TEST("prints node",{
+        Node left = new_leaf(VALUE_ON);
+        Node right = new_leaf(VALUE_OFF);
+        Node node = new_node(&left, &right, COMBINATOR_AND);
+        print_tree(node);
     })
 })
