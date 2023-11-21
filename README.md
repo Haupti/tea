@@ -10,3 +10,10 @@ so does `1 & 2`
 
 `(1 | 0) & 1` evalutes to 1\
 and `1 | 1 & 0` raises an exception because its not properly grouped.
+
+## Future plans
+* not operator
+* variables
+* functions
+* lists
+* io
