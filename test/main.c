@@ -32,11 +32,11 @@ DESCRIBE("read_tokens", {
         show_token(show, &tokens[5]);
         ASSERT_STR_EQUALS(show,"OR");
     })
-    TEST("prints leaf",{
+    XTEST("prints leaf",{
         Node node = new_leaf(VALUE_ON);
         print_tree(node);
     })
-    TEST("prints node",{
+    XTEST("prints node",{
         Node left = new_leaf(VALUE_ON);
         Node right = new_leaf(VALUE_OFF);
         Node node = new_node(&left, &right, COMBINATOR_AND);

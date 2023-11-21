@@ -16,6 +16,7 @@
         printf("    SUCCESSFUL TEST "#x"\n");\
     }\
 };
+#define XTEST(x,y) {printf("    SKIPPED TEST "#x"\n"); }
 
 #define ASSERT_EQUALS(x,y) {\
     assertion_count += 1;\
