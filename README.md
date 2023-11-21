@@ -9,11 +9,14 @@ for example:\
 so does `1 & 2`
 
 `(1 | 0) & 1` evalutes to 1\
-and `1 | 1 & 0` raises an exception because its not properly grouped.
+and `1 | 1 & 0` raises an exception because its not properly grouped.\
+`1 steve|20` evaluates to 1 because everything except '(', ')', '1', '0', '&' and '|' is ignored.
 
 ## Future plans
+* exceptions when finding characters that are now allowed
 * not operator
 * variables
 * functions
 * lists
 * io
+there is no need for types. everything is 1 or 0
