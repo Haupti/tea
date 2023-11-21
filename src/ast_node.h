@@ -1,5 +1,5 @@
-#ifndef EXPRESSION_HEADER
-#define EXPRESSION_HEADER
+#ifndef AST_NODE_HEADER
+#define AST_NODE_HEADER
 
 #include <stdlib.h>
 #include "token.h"

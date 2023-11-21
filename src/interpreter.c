@@ -3,7 +3,7 @@
 #include <string.h>
 
 #include "token.h"
-#include "expression.h"
+#include "ast_node.h"
 #include "cursor.h"
 #include "err.h"
 
