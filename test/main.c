@@ -4,7 +4,7 @@
 #include "assert.h"
 
 #include "../src/lexer.h"
-#include "../src/interpreter.h"
+#include "../src/ast_builder.h"
 #include "../src/token.h"
 
 DESCRIBE("read_tokens", {
