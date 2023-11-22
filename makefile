@@ -17,7 +17,7 @@ test: build_test
 	./$(BUILD)/test
 
 exec:
-	./$(BUILD)/tea
+	./$(BUILD)/tea test.tea
 
 run: build_prod exec
 
