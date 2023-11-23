@@ -2,6 +2,22 @@
 #include <stdio.h>
 #include <string.h>
 
+int is_value(Token token){
+    return token.type == ON || token.type == OFF;
+}
+
+int is_combinator(Token token){
+    return token.type == AND || token.type == OR;
+}
+
+int is_modifier(Token token){
+    return token.type == NOT;
+}
+
+int is_grp_open(Token token){
+    return token.type == GRP_OPEN;
+}
+
 void print_tokens(Token * tokens, size_t tokens_len){
     for(int i = 0; i < tokens_len; i++){
         print_token(&tokens[i]);
@@ -35,5 +51,7 @@ void show_token(char * destination, Token * token){
         case OFF:
             strcpy(destination, "OFF");
             break;
+        case NOT:
+            strcpy(destination, "NOT");
     }
 }

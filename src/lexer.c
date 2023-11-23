@@ -10,28 +10,28 @@ int read_tokens(Token * tokens, char * input, size_t input_len){
         switch(input[i]){
             case '(':
                 {
-                    Token token = {GRP_OPEN, NULL};
+                    Token token = {GRP_OPEN};
                     tokens[token_index] = token;
                     token_index += 1;
                     break;
                 }
             case ')':
                 {
-                    Token token = {GRP_CLOSE, NULL};
+                    Token token = {GRP_CLOSE};
                     tokens[token_index] = token;
                     token_index += 1;
                     break;
                 }
             case '1':
                 {
-                    Token token = {ON, NULL};
+                    Token token = {ON};
                     tokens[token_index] = token;
                     token_index += 1;
                     break;
                 }
             case '0':
                 {
-                    Token token = {OFF, NULL};
+                    Token token = {OFF};
                     tokens[token_index] = token;
                     token_index += 1;
                     break;
@@ -39,14 +39,21 @@ int read_tokens(Token * tokens, char * input, size_t input_len){
                 token_index += 1;
             case '&':
                 {
-                    Token token = {AND, NULL};
+                    Token token = {AND};
                     tokens[token_index] = token;
                     token_index += 1;
                     break;
                 }
             case '|':
                 {
-                    Token token = {OR, NULL};
+                    Token token = {OR};
+                    tokens[token_index] = token;
+                    token_index += 1;
+                    break;
+                }
+            case '!':
+                {
+                    Token token = {NOT};
                     tokens[token_index] = token;
                     token_index += 1;
                     break;

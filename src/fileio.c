@@ -1,21 +1,32 @@
-#include "fileio.h"
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
+#include "err.h"
+#include "fileio.h"
 
-int read_file(char * filename, char * target, int max_bytes){
-    size_t size_tracker = 0;
-    FILE * fptr;
-    fptr = fopen(filename, "r");
-    char line[200];
-    while(fgets(line, 200, fptr) != NULL){
-        if(size_tracker + strlen(line) > max_bytes){
-            return -1;
-        }
-        size_tracker += strlen(line);
-        strcat(target, line);
+FileContent read_file(char * filename){
+    char * buffer = 0;
+    long filesize;
+    FILE * fptr = fopen (filename, "rb");
+
+    if (fptr) {
+      fseek (fptr, 0, SEEK_END);
+      filesize = ftell (fptr);
+      fseek (fptr, 0, SEEK_SET);
+      buffer = malloc(filesize+1);
+      if (buffer) {
+        fread (buffer, 1, filesize, fptr);
+      }
+      else {
+          err("cant allocate space to read file");
+      }
+      fclose (fptr);
     }
-    fclose(fptr);
-    return 0;
+
+    buffer[filesize] = '\0';
+
+    FileContent file_content = { buffer, filesize+1 };
+    return file_content;
 }
 
 int file_size(char * filename){
@@ -23,7 +34,6 @@ int file_size(char * filename){
     fptr = fopen(filename, "r");
     fseek(fptr, 0, SEEK_END);
     int size = ftell(fptr);
-    fseek(fptr, 0, SEEK_SET);
     fclose(fptr);
     return size;
 }

@@ -7,6 +7,9 @@
 #include "../src/ast_builder.h"
 #include "../src/token.h"
 #include "../src/ast_evaluate.h"
+#include "ast_builder_internal.h"
+
+Token test_expression_fork[] = {{ NOT }, {ON}, {OR}, {NOT}, {GRP_OPEN}, {OFF}, {GRP_CLOSE}};
 
 DESCRIBE("read_tokens", {
     TEST("reads 1 & 0",{
@@ -33,16 +36,6 @@ DESCRIBE("read_tokens", {
         show_token(show, &tokens[5]);
         ASSERT_STR_EQUALS(show,"OR");
     })
-    XTEST("prints leaf",{
-        Node node = new_leaf(VALUE_ON);
-        print_tree(node);
-    })
-    XTEST("prints node",{
-        Node left = new_leaf(VALUE_ON);
-        Node right = new_leaf(VALUE_OFF);
-        Node node = new_node(&left, &right, COMBINATOR_AND);
-        print_tree(node);
-    })
     TEST("evaluates leaf",{
         Node node = new_leaf(VALUE_ON);
         Value value = evaluate_node(&node);
@@ -51,7 +44,7 @@ DESCRIBE("read_tokens", {
     TEST("evaluates flat fork",{
         Node left = new_leaf(VALUE_ON);
         Node right = new_leaf(VALUE_OFF);
-        Node node = new_node(&left, &right, COMBINATOR_AND);
+        Node node = new_fork(&left, &right, COMBINATOR_AND);
         Value value = evaluate_node(&node);
         ASSERT_EQUALS(value, VALUE_OFF);
     })
@@ -61,9 +54,9 @@ DESCRIBE("read_tokens", {
         Node left_d1 = new_leaf(VALUE_OFF);
         Node right_d1 = new_leaf(VALUE_ON);
 
-        Node node_d1 = new_node(&left_d1, &right_d1, COMBINATOR_OR);
+        Node node_d1 = new_fork(&left_d1, &right_d1, COMBINATOR_OR);
 
-        Node node = new_node(&left, &node_d1, COMBINATOR_AND);
+        Node node = new_fork(&left, &node_d1, COMBINATOR_AND);
 
         Value value = evaluate_node(&node);
         ASSERT_EQUALS(value, VALUE_ON);
@@ -74,11 +67,54 @@ DESCRIBE("read_tokens", {
         Node left_d1 = new_leaf(VALUE_ON);
         Node right_d1 = new_leaf(VALUE_ON);
 
-        Node node_d1 = new_node(&left_d1, &right_d1, COMBINATOR_AND);
+        Node node_d1 = new_fork(&left_d1, &right_d1, COMBINATOR_AND);
 
-        Node node = new_node(&node_d1, &right, COMBINATOR_AND);
+        Node node = new_fork(&node_d1, &right, COMBINATOR_AND);
 
         Value value = evaluate_node(&node);
         ASSERT_EQUALS(value, VALUE_ON);
     })
+    TEST("correctly finds left expression",{
+        Cursor cursor = new_cursor(test_expression_fork,0,7);
+        Cursor left_cursor = left_expression_cursor(&cursor);
+        ASSERT_EQUALS(left_cursor.position, 0);
+        ASSERT_EQUALS(current(&left_cursor).type, NOT);
+        ASSERT_EQUALS(next(&left_cursor).type, ON);
+        ASSERT_EQUALS(has_next(&left_cursor), 0);
+    })
+    TEST("correctly finds right expression",{
+        Cursor cursor = new_cursor(test_expression_fork,0,7);
+        Cursor right_cursor = right_expression_cursor(&cursor);
+        ASSERT_EQUALS(right_cursor.position, 3);
+        ASSERT_EQUALS(current(&right_cursor).type, NOT);
+        ASSERT_EQUALS(next(&right_cursor).type, GRP_OPEN);
+        ASSERT_EQUALS(next(&right_cursor).type, OFF);
+        ASSERT_EQUALS(next(&right_cursor).type, GRP_CLOSE);
+        ASSERT_EQUALS(has_next(&right_cursor), 0);
+    })
+    TEST("correctly finds combinator", {
+        Cursor cursor = new_cursor(test_expression_fork,0,7);
+        int combinator_pos = find_matching_combinator(&cursor);
+        ASSERT_EQUALS(combinator_pos, 2);
+    })
 })
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

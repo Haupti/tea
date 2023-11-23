@@ -8,6 +8,8 @@
 #include "src/lexer.h"
 #include "src/ast_builder.h"
 #include "src/ast_evaluate.h"
+#include "src/token.h"
+#include "src/err.h"
 
 int main(int args, char * argv[]){
 
@@ -16,15 +18,16 @@ int main(int args, char * argv[]){
         return EXIT_FAILURE;
     }
 
-    int filesize = file_size(argv[1]);
-    char * program = malloc(sizeof(char) * (filesize + 1));
-    read_file(argv[1],program, filesize);
+    FileContent file_content = read_file(argv[1]);
+    long filesize = file_content.size;
+    char * program = file_content.buffer;
 
     Token * tokens = malloc(sizeof(Token) * filesize); // if every char would result in a token
     int tokens_len = read_tokens(tokens, program, strlen(program));
     tokens = realloc(tokens, sizeof(Token) * tokens_len); // it propably didnt -> resize
 
     Node tree = build_tree(tokens, 0, tokens_len-1);
+    print_tree(tree);
     Value val = evaluate_node(&tree);
 
     switch(val){

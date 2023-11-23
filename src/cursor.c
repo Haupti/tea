@@ -17,6 +17,17 @@ void print_cursor(Cursor * it){
     printf("Cursor (size %d) { arr: %p, start: %d, end: %d, position: %d }\n", size(it), it->arr, (int) it->start, (int) it->end, it->position);
 }
 
+void print_cursor_content(Cursor * it){
+    printf("Cursor ");
+    for(int i = it->start; i<=it->end; i++){
+        Token token = it->arr[i];
+        char representation[20];
+        show_token(representation, &token);
+        printf("%s ", representation);
+    }
+    printf("\n");
+}
+
 Token next(Cursor * it){
     if(it->end < (it->position + 1)){
         puts("cursor next: index out of bounds");

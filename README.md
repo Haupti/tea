@@ -15,8 +15,9 @@ and `1 | 1 & 0` raises an exception because its not properly grouped.\
 ## Future plans
 * exceptions when finding characters that are now allowed (maybe ?)
 * not operator
+* syntax checker that runs over the tokens
+* lists
 * variables
 * functions
-* lists
 * io
 there is no need for types. everything is 1 or 0

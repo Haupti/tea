@@ -15,14 +15,21 @@ typedef enum Combinator {
 } Combinator;
 
 
+typedef enum Modifier {
+    MODIFIER_ID,
+    MODIFIER_NOT,
+} Modifier;
+
 typedef union NodeValue{
     enum Value value;
     enum Combinator combinator;
+    enum Modifier modifier;
 } NodeValue;
 
 typedef enum NodeType {
     LEAF,
     FORK,
+    SPROUT,
 } NodeType;
 
 typedef struct Node {
@@ -30,10 +37,32 @@ typedef struct Node {
     NodeValue value;
     struct Node * left;
     struct Node * right;
+    struct Node * tip;
 } Node;
 
 Node new_leaf(Value value);
-Node new_node(Node * left, Node * right, Combinator combinator);
+Node new_sprout(Node * tip, Modifier modifier);
+Node new_fork(Node * left, Node * right, Combinator combinator);
+
+/* TODO consider this later, if this becomes useful
+typedef struct Leaf {
+    Value value;
+} Leaf;
+
+typedef struct Sprout{
+    Modifier modifier;
+    Node * tip;
+} Sprout;
+
+typedef struct Fork{
+    Combinator combinator;
+    Node * left;
+    Node * right;
+} Fork;
+as_leaf(Node * node);
+as_sprout(Node * node);
+as_fork(Node * node);
+*/
 
 void print_tree(Node node);
 

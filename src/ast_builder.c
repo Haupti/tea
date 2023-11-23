@@ -8,39 +8,6 @@
 #include "err.h"
 
 
-// p stands for pedantic
-void * p_realloc(void * ptr, size_t size){
-    void * new = realloc(ptr, size);
-    if(new == NULL){
-        puts("ERROR: out of continuous memory");
-        exit(EXIT_FAILURE);
-    }
-    return new;
-}
-
-
-
-Value evaluate(Value v1, Combinator combinator, Value v2){
-    switch(combinator){
-        case COMBINATOR_AND:
-            if(v1 == VALUE_ON && v2 == VALUE_ON){
-                return VALUE_ON;
-            }
-            else{
-                return VALUE_OFF;
-            }
-            break;
-        case COMBINATOR_OR:
-            if(v1 == VALUE_OFF && v2 == VALUE_ON){
-                return VALUE_OFF;
-            }
-            else {
-                return VALUE_ON;
-            }
-            break;
-    }
-}
-
 // expects the cursor to be at the position of grp_close
 // returns value between start and end: the position of the matching grp_close
 // error if no matching grp_close could be found
@@ -49,7 +16,7 @@ int find_matching_grp_close(Cursor * original_cursor){
     Cursor * cursor = &cursor_val;
 
     if(current(cursor).type != GRP_OPEN){
-        err("while searching bracket: cannot find matching bracket if im not at a bracket");
+        err("while searching bracket: cannot find matching ')' if im not at a '('");
     }
     Cursor temp = copy_cursor(cursor);
     Token token = current(&temp);
@@ -74,46 +41,7 @@ int find_matching_grp_close(Cursor * original_cursor){
     return -1;
 }
 
-// expects the cursor to be at the position of grp_open
-// returns value between start and end: the position of the matching grp_open
-// error if no matching grp_open could be found
-int find_matching_grp_open(Cursor * original_cursor){
-    Cursor cursor_val = copy_cursor(original_cursor);
-    Cursor * cursor = &cursor_val;
 
-    if(current(cursor).type != GRP_CLOSE){
-        err("while searching bracket: cannot find matching bracket if im not at a bracket");
-    }
-    Cursor temp = copy_cursor(cursor);
-    Token token = current(&temp);
-    int bracket_counter = 1;
-    while(has_prev(&temp)){
-        token = prev(&temp);
-        switch(token.type){
-            case GRP_CLOSE:
-                bracket_counter += 1;
-                break;
-            case GRP_OPEN:
-                bracket_counter -= 1;
-                if(bracket_counter == 0){
-                    return temp.position;
-                }
-                break;
-            default:
-                break;
-        }
-    }
-    err("while searching bracket: no matching '(' found");
-    return -1;
-}
-
-int is_value(Token token){
-    return token.type == ON || token.type == OFF;
-}
-
-int is_combinator(Token token){
-    return token.type == AND || token.type == OR;
-}
 
 Value to_value(Token token){
     Value value;
@@ -147,69 +75,84 @@ Combinator to_combinator(Token token){
     return combinator;
 }
 
-Cursor left_expression_cursor(Cursor * cursor){
-    if(is_value(current(cursor))){
-        Cursor new_cursor = {cursor->arr, cursor->position, cursor->position, cursor->position};
-        return new_cursor;
+Cursor left_expression_cursor(Cursor * original_cursor){
+    Cursor cursor_val = copy_cursor(original_cursor);
+    Cursor * cursor = &cursor_val;
+    const int start = cursor->position;
+    int end;
+
+    while(1){
+        if(is_grp_open(current(cursor))){
+            end = find_matching_grp_close(cursor);
+            break;
+        }
+        if(is_value(current(cursor))){
+            end = cursor->position;
+            break;
+        }
+        next(cursor);
     }
-    int start = cursor->position;
-    int end = find_matching_grp_close(cursor);
-    Cursor new_cursor = {cursor->arr, start+1, end-1, start+1};
+
+    Cursor new_cursor = {cursor->arr, start, end, start};
     return new_cursor;
+}
+
+
+int find_matching_combinator(Cursor * original_cursor){
+    Cursor cursor_val = copy_cursor(original_cursor);
+    Cursor * cursor = &cursor_val;
+
+    while(1){ // must find an combinator
+        if(is_grp_open(current(cursor))){
+            int matching_close = find_matching_grp_close(cursor);
+            jump_to(cursor, matching_close);
+            next(cursor);
+            break;
+        }
+        if(is_value(current(cursor))){
+            next(cursor);
+            break;
+        }
+        next(cursor);
+    }
+    return cursor->position;
+}
+
+
+Combinator find_combinator(Cursor * original_cursor){
+    Cursor cursor_val = copy_cursor(original_cursor);
+    Cursor * cursor = &cursor_val;
+
+    int combinator_pos = find_matching_combinator(cursor) ;
+    Combinator combinator = to_combinator(cursor->arr[combinator_pos]);
+
+    return combinator;
 }
 
 Cursor right_expression_cursor(Cursor * original_cursor){
     Cursor cursor_val = copy_cursor(original_cursor);
     Cursor * cursor = &cursor_val;
 
-    if(is_value(current(cursor))){
-        next(cursor); // at combinator
-        next(cursor); // at right open bracket
-    }
-    else{
-        int left_close = find_matching_grp_close(cursor);
-        jump_to(cursor, left_close);
-        next(cursor); // at combinator
-        next(cursor); // at right open bracket
+    int combinator_pos = find_matching_combinator(cursor);
+    jump_to(cursor, combinator_pos);
+    next(cursor); // at start right expression
+    const int start = cursor->position;
+
+    int end;
+    while(1){ // must find an expression end
+        if(is_grp_open(current(cursor))){
+            end = find_matching_grp_close(cursor);
+            break;
+        }
+        if(is_value(current(cursor))){
+            end = cursor->position;
+            break;
+        }
+        next(cursor);
     }
 
-    int start;
-    int end;
-    if(is_value(current(cursor))){
-        start = cursor->position;
-        end = cursor->position;
-    }
-    else{
-        start = cursor->position+1;
-        end = find_matching_grp_close(cursor)-1;
-    }
     Cursor new_cursor = {cursor->arr, start, end, start};
     return new_cursor;
-}
-
-Combinator find_combinator(Cursor * original_cursor){
-    Cursor cursor_val = copy_cursor(original_cursor);
-    Cursor * cursor = &cursor_val;
-
-    Token token = current(cursor);
-    if(is_combinator(token)){
-        return to_combinator(token);
-    }
-    if(is_value(token)){
-        if(!has_next(cursor)){
-            err("unexpected end: expected a combinator");
-        }
-        token = next(cursor);
-        return to_combinator(token);
-    }
-    int close_pos = find_matching_grp_close(cursor);
-    jump_to(cursor, close_pos);
-    token = next(cursor);
-    return to_combinator(token);
-}
-
-int is_one_expression_surrounded_by_brackets(Cursor * cursor){
-    return current(cursor).type == GRP_OPEN && find_matching_grp_close(cursor) == cursor->end;
 }
 
 Cursor create_cursor_for_inner_expession(Cursor * cursor){
@@ -217,6 +160,27 @@ Cursor create_cursor_for_inner_expession(Cursor * cursor){
    return inner_cursor;
 }
 
+Cursor create_cursor_without_first(Cursor * cursor){
+   Cursor inner_cursor = new_cursor(cursor->arr, (cursor->start + 1), cursor->end);
+   return inner_cursor;
+}
+
+int holds_a_sprout(Cursor * original_cursor){
+    Cursor cursor_val = copy_cursor(original_cursor);
+    Cursor * cursor = &cursor_val;
+
+    Token token = current(cursor);
+    if(token.type == GRP_OPEN && find_matching_grp_close(cursor) == cursor->end){
+        return 1;
+    }
+    else if(is_value(token)){
+        return cursor->position == cursor->end;
+    }
+    else { // modifier or something else
+        Cursor shrinked_cursor = create_cursor_without_first(cursor);
+        return holds_a_sprout(&shrinked_cursor);
+    }
+}
 
 Node * build_node(Cursor cursor){
     if(size(&cursor) == 1){
@@ -225,10 +189,22 @@ Node * build_node(Cursor cursor){
         memcpy(leaf, &temp_leaf, sizeof(Node));
         return leaf;
     }
-    if(is_one_expression_surrounded_by_brackets(&cursor)){
-        // then there are just brackets around this node which need to be skipped
-        Cursor inner_cursor = create_cursor_for_inner_expession(&cursor);
-        return build_node(inner_cursor);
+    else if(holds_a_sprout(&cursor)){
+        Modifier modifier;
+        Cursor inner_cursor;
+        if(current(&cursor).type == NOT){
+            modifier = MODIFIER_NOT;
+            inner_cursor = create_cursor_without_first(&cursor);
+        }
+        else { // must be a bracket then
+            modifier = MODIFIER_ID;
+            inner_cursor = create_cursor_for_inner_expession(&cursor);
+        }
+        Node * sprout = malloc(sizeof(Node));
+        build_node(inner_cursor);
+        Node temp_sprout = new_sprout(build_node(inner_cursor), modifier);
+        memcpy(sprout, &temp_sprout, sizeof(Node));
+        return sprout;
     }
     else {
         Node * left = build_node(left_expression_cursor(&cursor));

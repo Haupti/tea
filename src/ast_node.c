@@ -4,14 +4,20 @@
 Node new_leaf(Value value){
     NodeValue nodeValue;
     nodeValue.value = value;
-    Node node = { LEAF, nodeValue, NULL, NULL };
+    Node node = { LEAF, nodeValue, NULL, NULL, NULL };
     return node;
 }
 
-Node new_node(Node * left, Node * right, Combinator combinator){
+Node new_fork(Node * left, Node * right, Combinator combinator){
     NodeValue nodeValue;
     nodeValue.combinator = combinator;
-    Node node = { FORK, nodeValue, left, right};
+    Node node = { FORK, nodeValue, left, right, NULL};
+    return node;
+}
+Node new_sprout(Node * tip, Modifier modifier){
+    NodeValue nodeValue;
+    nodeValue.modifier = modifier;
+    Node node = { SPROUT, nodeValue, NULL, NULL, tip};
     return node;
 }
 
@@ -27,6 +33,18 @@ void print_tree(Node node){
                         printf("VALUE_OFF");
                         break;
                 }
+                break;
+            }
+        case SPROUT:
+            {
+                if(node.value.modifier == MODIFIER_NOT){
+                    printf("!(");
+                }
+                else {
+                    printf("(");
+                }
+                print_tree(*node.tip);
+                printf(")");
                 break;
             }
         case FORK:
