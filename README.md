@@ -14,7 +14,7 @@ and `1 | 1 & 0` raises an exception because its not properly grouped.\
 
 ## Future plans
 * exceptions when finding characters that are now allowed (maybe ?)
-* syntax checker that runs over the tokens
+* syntax verifier checks that any node has exaclty two children aka this wont pass syntax check: `(1 | 0 | 0)`
 * lists
 * variables
 * functions
