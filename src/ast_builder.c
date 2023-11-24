@@ -102,7 +102,7 @@ Node * to_leaf_or_spout_with_leaf(Slice slice){
     }
 }
 
-Node * build_node_2(Slice slice){
+Node * build_node(Slice slice){
 
     int success = 0;
 
@@ -133,54 +133,55 @@ Node * build_node_2(Slice slice){
         Combinator combinator = to_combinator(token_at(slice, value_index+1)); // next token must be combinator
 
         Slice right_slice = new_slice(slice.arr, value_index+2, slice.end); // next next token must is start of right node
-        Node * right_node = build_node_2(right_slice);
+        Node * right_node = build_node(right_slice);
         Node temp_fork = new_fork(left_node, right_node, combinator);
         Node * fork = malloc(sizeof(Node));
         memcpy(fork, &temp_fork, sizeof(Node));
         return fork;
-    }
-    // else must be bracket
-    int bracket_open_pos = i;
+    }else{
+        // else must be bracket
+        int bracket_open_pos = i;
 
 
-    Slice group_slice = cut_group_slice_to_size(new_slice(slice.arr, bracket_open_pos, slice.end));
+        Slice group_slice = cut_group_slice_to_size(new_slice(slice.arr, bracket_open_pos, slice.end));
 
-    Node * left_node = build_node_2(group_slice);
-    if(slice.end-1 == group_slice.end){
-        return left_node;
-    }
-    Combinator combinator = to_combinator(token_at(slice, group_slice.end + 2)); // next next after group slice must be the combinator
+        Node * left_node = build_node(group_slice);
+        if(slice.end-1 == group_slice.end){
+            return left_node;
+        }
+        Combinator combinator = to_combinator(token_at(slice, group_slice.end + 2)); // next next after group slice must be the combinator
 
-    Slice right_slice = new_slice(slice.arr, group_slice.end + 3, slice.end); // next next next after group slice is start of right node
-    Node * right_node = build_node_2(right_slice);
-    Node temp_fork = new_fork(left_node, right_node, combinator);
+        Slice right_slice = new_slice(slice.arr, group_slice.end + 3, slice.end); // next next next after group slice is start of right node
+        Node * right_node = build_node(right_slice);
+        Node temp_fork = new_fork(left_node, right_node, combinator);
 
-    Node * fork = malloc(sizeof(Node));
-    memcpy(fork, &temp_fork, sizeof(Node));
+        Node * fork = malloc(sizeof(Node));
+        memcpy(fork, &temp_fork, sizeof(Node));
 
 
 
-    int not_count;
-    if(bracket_open_pos == slice.start){
-        not_count = 0;
-    }else {
-        Slice left_from_group = new_slice(slice.arr, slice.start, bracket_open_pos - 1);
-        not_count = effective_not_count(left_from_group);
-    }
-    if(not_count == 0){
-        return fork;
-    }
-    else {
-        Node * sprout = malloc(sizeof(Node));
-        Node temp_sprout = new_sprout(fork, MODIFIER_NOT);
-        memcpy(sprout, &temp_sprout, sizeof(Node));
-        return sprout;
-    }
+        int not_count;
+        if(bracket_open_pos == slice.start){
+            not_count = 0;
+        }else {
+            Slice left_from_group = new_slice(slice.arr, slice.start, bracket_open_pos - 1);
+            not_count = effective_not_count(left_from_group);
+        }
+        if(not_count == 0){
+            return fork;
+        }
+        else {
+            Node * sprout = malloc(sizeof(Node));
+            Node temp_sprout = new_sprout(fork, MODIFIER_NOT);
+            memcpy(sprout, &temp_sprout, sizeof(Node));
+            return sprout;
+        }
+        }
 }
 
 Node build_tree(Token * tokens, size_t start_token, size_t end_token){
     Slice slice = new_slice(tokens, start_token, end_token);
-    return *build_node_2(slice);
+    return *build_node(slice);
 }
 
 /*
