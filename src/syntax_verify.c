@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include "syntax_verify.h"
 #include "ast_node.h"
-#include "cursor.h"
 #include "token.h"
 
 SyntaxVerification verification_with_error(SyntaxErrorType type, Token at_token, int at_position){

@@ -8,7 +8,5 @@
 
 
 Node build_tree(Token * tokens, size_t start_token, size_t end_token);
-Node build_tree_2(Token * tokens, size_t start_token, size_t end_token);
 
-int call_counter();
 #endif

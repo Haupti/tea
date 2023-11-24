@@ -38,9 +38,8 @@ int main(int args, char * argv[]){
 
     // build AST / binary tree
     printf("building tree...");
-    Node tree = build_tree_2(tokens, 0, tokens_len-1);
+    Node tree = build_tree(tokens, 0, tokens_len-1);
     printf("done\n");
-    printf("calls to find bracket close: %d\n", call_counter());
 
     // evaluate program
     printf("evaluating...\n");

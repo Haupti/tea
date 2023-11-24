@@ -77,32 +77,6 @@ DESCRIBE("read_tokens", {
         Value value = evaluate_node(&node);
         ASSERT_EQUALS(value, VALUE_ON);
     })
-    TEST("correctly finds left expression",{
-        Token test_expression_fork[] = ARRAY({ NOT }, {ON}, {OR}, {NOT}, {GRP_OPEN}, {OFF}, {GRP_CLOSE});
-        Cursor cursor = new_cursor(test_expression_fork,0,7);
-        Cursor left_cursor = left_expression_cursor(&cursor);
-        ASSERT_EQUALS(left_cursor.position, 0);
-        ASSERT_EQUALS(current(&left_cursor).type, NOT);
-        ASSERT_EQUALS(next(&left_cursor).type, ON);
-        ASSERT_EQUALS(has_next(&left_cursor), 0);
-    })
-    TEST("correctly finds right expression",{
-        Token test_expression_fork[] = ARRAY({ NOT }, {ON}, {OR}, {NOT}, {GRP_OPEN}, {OFF}, {GRP_CLOSE});
-        Cursor cursor = new_cursor(test_expression_fork,0,7);
-        Cursor right_cursor = right_expression_cursor(&cursor);
-        ASSERT_EQUALS(right_cursor.position, 3);
-        ASSERT_EQUALS(current(&right_cursor).type, NOT);
-        ASSERT_EQUALS(next(&right_cursor).type, GRP_OPEN);
-        ASSERT_EQUALS(next(&right_cursor).type, OFF);
-        ASSERT_EQUALS(next(&right_cursor).type, GRP_CLOSE);
-        ASSERT_EQUALS(has_next(&right_cursor), 0);
-    })
-    TEST("correctly finds combinator", {
-        Token test_expression_fork[] = ARRAY({ NOT }, {ON}, {OR}, {NOT}, {GRP_OPEN}, {OFF}, {GRP_CLOSE});
-        Cursor cursor = new_cursor(test_expression_fork,0,7);
-        int combinator_pos = find_matching_combinator(&cursor);
-        ASSERT_EQUALS(combinator_pos, 2);
-    })
     TEST("verifies no open bracket before closing bracket",{
         Token tokens[] = ARRAY(ON, GRP_CLOSE, ON, GRP_OPEN);
         SyntaxVerification result = verify_syntax(tokens,4);
@@ -209,13 +183,13 @@ DESCRIBE("read_tokens", {
     })
     TEST("builds leaf", {
         Token tokens[] = ARRAY(NOT, NOT, ON);
-        Node node =  build_tree_2(tokens,0, 2);
+        Node node =  build_tree(tokens,0, 2);
         ASSERT_EQUALS(node.type, LEAF);
         ASSERT_EQUALS(node.value.value, VALUE_ON);
     })
     TEST("builds sprout with leaf", {
         Token tokens[] = ARRAY(NOT, ON);
-        Node node =  build_tree_2(tokens, 0, 1);
+        Node node =  build_tree(tokens, 0, 1);
         ASSERT_EQUALS(node.type, SPROUT);
         ASSERT_EQUALS(node.value.modifier, MODIFIER_NOT);
         ASSERT_EQUALS(node.tip->type, LEAF);
@@ -223,7 +197,7 @@ DESCRIBE("read_tokens", {
     })
     TEST("builds fork", {
         Token tokens[] = ARRAY(ON, OR, OFF);
-        Node node =  build_tree_2(tokens, 0, 2);
+        Node node =  build_tree(tokens, 0, 2);
         ASSERT_EQUALS(node.type, FORK);
         ASSERT_EQUALS(node.value.combinator, COMBINATOR_OR);
         ASSERT_EQUALS(node.left->type, LEAF);
@@ -233,7 +207,7 @@ DESCRIBE("read_tokens", {
     })
     TEST("builds fork with group brackets", {
         Token tokens[] = ARRAY(GRP_OPEN, ON, OR, OFF, GRP_CLOSE);
-        Node node =  build_tree_2(tokens, 0, 4);
+        Node node =  build_tree(tokens, 0, 4);
         ASSERT_EQUALS(node.type, FORK);
         ASSERT_EQUALS(node.value.combinator, COMBINATOR_OR);
         ASSERT_EQUALS(node.left->type, LEAF);

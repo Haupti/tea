@@ -2,7 +2,6 @@
 #define SYNTAX_VERIFY_HEADER
 
 #include "token.h"
-#include "cursor.h"
 
 typedef enum SyntaxErrorType {
     SYNTX_ERR_UNCLOSED_GROUP,
