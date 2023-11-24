@@ -5,8 +5,11 @@
 #include "cursor.h"
 
 typedef enum SyntaxErrorType {
-    UNCLOSED_GROUP,
-    NO_GROUP_TO_CLOSE,
+    SYNTX_ERR_UNCLOSED_GROUP,
+    SYNTX_ERR_NO_GROUP_TO_CLOSE,
+    SYNTX_ERR_VALUE_MISSING,
+    SYNTX_ERR_COMBINATOR_MISSING,
+    SYNTX_ERR_TOO_MANY_TOKENS_IN_GROUP,
 } SyntaxErrorType;
 
 typedef struct SyntaxError {
@@ -27,4 +30,8 @@ typedef struct SyntaxVerification {
 
 SyntaxVerification verify_syntax(Token * tokens, size_t tokens_len);
 
+// does not exit if it has no error
+void print_err_and_exit(SyntaxVerification verification);
+
+void print_error_type(SyntaxErrorType type);
 #endif

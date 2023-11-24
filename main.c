@@ -31,22 +31,7 @@ int main(int args, char * argv[]){
 
     // syntax check
     SyntaxVerification syntax_verification = verify_syntax(tokens, tokens_len);
-    if(syntax_verification.has_error){
-        switch(syntax_verification.result.error.error_type){
-            case NO_GROUP_TO_CLOSE:{
-                    printf("SYNTAX ERROR: closing a group without matching open\n");
-                    printf("SYNTAX ERROR: at token position %d\n", syntax_verification.result.error.at_position);
-                    exit(EXIT_FAILURE);
-                    break;
-                }
-            case UNCLOSED_GROUP:{
-                    printf("SYNTAX ERROR: expecting a ')'\n");
-                    printf("SYNTAX ERROR: at token position %d\n", syntax_verification.result.error.at_position);
-                    exit(EXIT_FAILURE);
-                    break;
-                }
-        }
-    }
+    print_err_and_exit(syntax_verification);
 
 
     // build AST / binary tree
