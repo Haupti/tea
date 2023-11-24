@@ -30,16 +30,22 @@ int main(int args, char * argv[]){
     tokens = realloc(tokens, sizeof(Token) * tokens_len); // it propably didnt -> resize
 
     // syntax check
+    printf("checking syntax...");
     SyntaxVerification syntax_verification = verify_syntax(tokens, tokens_len);
     print_err_and_exit(syntax_verification);
+    printf("ok\n");
 
 
     // build AST / binary tree
-    Node tree = build_tree(tokens, 0, tokens_len-1);
+    printf("building tree...");
+    Node tree = build_tree_2(tokens, 0, tokens_len-1);
+    printf("done\n");
+    printf("calls to find bracket close: %d\n", call_counter());
 
     // evaluate program
+    printf("evaluating...\n");
     Value val = evaluate_node(&tree);
-
+;
     switch(val){
         case VALUE_ON:
             puts("1");

@@ -4,6 +4,7 @@
 #include "assert.h"
 #include "assert_helpers.h"
 
+#include "../src/slice.h"
 #include "../src/lexer.h"
 #include "../src/ast_builder.h"
 #include "../src/token.h"
@@ -154,6 +155,91 @@ DESCRIBE("read_tokens", {
         SyntaxVerification result = verify_syntax(tokens,5);
         ASSERT_EQUALS(result.has_error, 1);
         ASSERT_EQUALS(result.result.error.error_type, SYNTX_ERR_TOO_MANY_TOKENS_IN_GROUP);
+    })
+    TEST("cuts group slice to size (cuts off end after group close and the brackets)", {
+        Token tokens[] = ARRAY(GRP_OPEN, ON, GRP_CLOSE, ON);
+        Slice slice = new_slice(tokens, 0, 3);
+        Slice grou_slice = cut_group_slice_to_size(slice);
+
+        ASSERT_EQUALS(grou_slice.start, 1);
+        ASSERT_EQUALS(grou_slice.end, 1);
+    })
+    TEST("effective not count", {
+        Token even_nots_1[] = ARRAY(NOT, NOT, NOT, NOT, ON);
+        Slice en1_slice = new_slice(even_nots_1, 0, 4);
+        int en1_result = effective_not_count(en1_slice);
+        ASSERT_EQUALS(en1_result, 0);
+
+        Token even_nots_2[] = ARRAY(ON);
+        Slice en2_slice = new_slice(even_nots_2, 0, 0);
+        int en2_result = effective_not_count(en2_slice);
+        ASSERT_EQUALS(en2_result, 0);
+
+        Token odd_nots_1[] = ARRAY(NOT, ON);
+        Slice en3_slice = new_slice(odd_nots_1, 0, 1);
+        int en3_result = effective_not_count(en3_slice);
+        ASSERT_EQUALS(en3_result, 1);
+
+        Token odd_nots_2[] = ARRAY(NOT, NOT, NOT, NOT, NOT, ON);
+        Slice en4_slice = new_slice(odd_nots_2, 0, 5);
+        int en4_result = effective_not_count(en4_slice);
+        ASSERT_EQUALS(en4_result, 1);
+    })
+    TEST("creates leaf for even number of nots", {
+        Token tokens[] = ARRAY(NOT, NOT, ON) ;
+        Slice slice = new_slice(tokens, 0, 2);
+        Node * node =  to_leaf_or_spout_with_leaf(slice);
+        ASSERT_EQUALS(node->type, LEAF);
+        ASSERT_EQUALS(node->value.value, VALUE_ON);
+    })
+    TEST("creates leaf for no modifier", {
+        Token tokens[] = ARRAY(ON) ;
+        Slice slice = new_slice(tokens, 0, 0);
+        Node * node =  to_leaf_or_spout_with_leaf(slice);
+        ASSERT_EQUALS(node->type, LEAF);
+        ASSERT_EQUALS(node->value.value, VALUE_ON);
+    })
+    TEST("creates sprout with leaf for odd number of nots", {
+        Token tokens[] = ARRAY(NOT, NOT, NOT, ON) ;
+        Slice slice = new_slice(tokens, 0, 3);
+        Node * node =  to_leaf_or_spout_with_leaf(slice);
+        ASSERT_EQUALS(node->type, SPROUT);
+        ASSERT_EQUALS(node->tip->type, LEAF);
+        ASSERT_EQUALS(node->tip->value.value, VALUE_ON);
+    })
+    TEST("builds leaf", {
+        Token tokens[] = ARRAY(NOT, NOT, ON);
+        Node node =  build_tree_2(tokens,0, 2);
+        ASSERT_EQUALS(node.type, LEAF);
+        ASSERT_EQUALS(node.value.value, VALUE_ON);
+    })
+    TEST("builds sprout with leaf", {
+        Token tokens[] = ARRAY(NOT, ON);
+        Node node =  build_tree_2(tokens, 0, 1);
+        ASSERT_EQUALS(node.type, SPROUT);
+        ASSERT_EQUALS(node.value.modifier, MODIFIER_NOT);
+        ASSERT_EQUALS(node.tip->type, LEAF);
+        ASSERT_EQUALS(node.tip->value.value, VALUE_ON);
+    })
+    TEST("builds fork", {
+        Token tokens[] = ARRAY(ON, OR, OFF);
+        Node node =  build_tree_2(tokens, 0, 2);
+        ASSERT_EQUALS(node.type, FORK);
+        ASSERT_EQUALS(node.value.combinator, COMBINATOR_OR);
+        ASSERT_EQUALS(node.left->type, LEAF);
+        ASSERT_EQUALS(node.left->value.value, VALUE_ON);
+        ASSERT_EQUALS(node.right->type, LEAF);
+        ASSERT_EQUALS(node.right->value.value, VALUE_OFF);
+    })
+    TEST("builds fork with group brackets", {
+        Token tokens[] = ARRAY(GRP_OPEN, ON, OR, OFF, GRP_CLOSE);
+        Node node =  build_tree_2(tokens, 0, 4);
+        ASSERT_EQUALS(node.type, FORK);
+        ASSERT_EQUALS(node.value.combinator, COMBINATOR_OR);
+        ASSERT_EQUALS(node.left->type, LEAF);
+        ASSERT_EQUALS(node.left->value.value, VALUE_ON);
+        ASSERT_EQUALS(node.right->type, LEAF);
+        ASSERT_EQUALS(node.right->value.value, VALUE_OFF);
     })
 })
 

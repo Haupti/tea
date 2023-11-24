@@ -84,3 +84,8 @@ Token start(Cursor * it){
     it->position = it->start;
     return it->arr[it->position];
 }
+
+Token end(Cursor * it){
+    it->position = it->end;
+    return it->arr[it->position];
+}
