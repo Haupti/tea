@@ -46,19 +46,34 @@ void print_err_and_exit(SyntaxVerification verification){
             case SYNTX_ERR_NO_GROUP_TO_CLOSE:{
                     printf("SYNTAX ERROR: closing a group without matching open\n");
                     printf("SYNTAX ERROR: at token position %d\n", verification.result.error.at_position);
-                    exit(EXIT_FAILURE);
                     break;
                 }
             case SYNTX_ERR_UNCLOSED_GROUP:{
                     printf("SYNTAX ERROR: expecting a ')'\n");
                     printf("SYNTAX ERROR: at token position %d\n", verification.result.error.at_position);
-                    exit(EXIT_FAILURE);
+                    break;
+                }
+            case SYNTX_ERR_COMBINATOR_MISSING:{
+                    printf("SYNTAX ERROR: missing a combinator\n");
+                    printf("SYNTAX ERROR: at token position %d\n", verification.result.error.at_position);
+                    break;
+                }
+            case SYNTX_ERR_VALUE_MISSING:{
+                    printf("SYNTAX ERROR: missing a value\n");
+                    printf("SYNTAX ERROR: at token position %d\n", verification.result.error.at_position);
+                    break;
+                }
+            case SYNTX_ERR_TOO_MANY_TOKENS_IN_GROUP:{
+                    printf("SYNTAX ERROR: too many tokens in this group. a group can only contain two values and one combinator\n");
+                    printf("SYNTAX ERROR: at token position %d\n", verification.result.error.at_position);
                     break;
                 }
             default:
-                // TODO
+                printf("SYNTAX ERROR: unspecified");
+                printf("SYNTAX ERROR: at token position %d\n", verification.result.error.at_position);
                 break;
         }
+        exit(EXIT_FAILURE);
     }
 }
 
@@ -149,9 +164,6 @@ SyntaxVerification verify_syntax(Token * tokens, size_t tokens_len){
         }
         if(token.type == GRP_OPEN && next_token->type == GRP_CLOSE){
             return verification_with_error(SYNTX_ERR_VALUE_MISSING, *next_token, i+1);
-        }
-        if(token.type == GRP_CLOSE && next_token->type == GRP_OPEN){
-            return verification_with_error(SYNTX_ERR_COMBINATOR_MISSING,*next_token, i+1);
         }
     }
 
