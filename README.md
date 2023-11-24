@@ -15,12 +15,13 @@ and `1 | 1 & 0` raises an exception because its not properly grouped.\
 ## Future plans
 * exceptions when finding characters that are now allowed (maybe ?)
 * update syntax checker when problem occurs
-* lists
 * variables
 * functions
+* lists
 * io
 there is no need for types. everything is 1 or 0
 
 ## version feature list (short)
 * **0.0.1 (not tagged)** evaluation of expressions containing '(', ')', '1', '0', '|' and '&'
 * **0.0.2** not modifier '!' to prefix groups (brackets), values or values with modifier: `!1 -> 0`, `!!1 -> 0`, `!(!1) | !(0) -> 1`, `!(0 & 1) -> 1` etc..
+* **0.0.3** reimplemented the algorithm: its way faster now. still hard to read.
