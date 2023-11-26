@@ -13,6 +13,9 @@
 #include "assert_helpers.h"
 #include "ast_builder_internal.h"
 
+Node new_top_level_leaf(Value value){
+    return new_leaf(value, NULL, 0);
+}
 
 DESCRIBE("read_tokens", {
     TEST("reads 1 & 0",{
@@ -66,22 +69,22 @@ DESCRIBE("read_tokens", {
         ASSERT_STR_EQUALS(show,"IDENTIFIER(a)");
     })
     TEST("evaluates leaf",{
-        Node node = new_leaf(VALUE_ON);
+        Node node = new_top_level_leaf(VALUE_ON);
         Value value = evaluate_node(&node);
         ASSERT_EQUALS(value, VALUE_ON);
     })
     TEST("evaluates flat fork",{
-        Node left = new_leaf(VALUE_ON);
-        Node right = new_leaf(VALUE_OFF);
+        Node left = new_top_level_leaf(VALUE_ON);
+        Node right = new_top_level_leaf(VALUE_OFF);
         Node node = new_fork(&left, &right, COMBINATOR_AND);
         Value value = evaluate_node(&node);
         ASSERT_EQUALS(value, VALUE_OFF);
     })
     TEST("evaluates nested fork (left is leaf)",{
-        Node left = new_leaf(VALUE_ON);
+        Node left = new_top_level_leaf(VALUE_ON);
 
-        Node left_d1 = new_leaf(VALUE_OFF);
-        Node right_d1 = new_leaf(VALUE_ON);
+        Node left_d1 = new_top_level_leaf(VALUE_OFF);
+        Node right_d1 = new_top_level_leaf(VALUE_ON);
 
         Node node_d1 = new_fork(&left_d1, &right_d1, COMBINATOR_OR);
 
@@ -91,10 +94,10 @@ DESCRIBE("read_tokens", {
         ASSERT_EQUALS(value, VALUE_ON);
     })
     TEST("evaluates nested fork (right is leaf)",{
-        Node right = new_leaf(VALUE_ON);
+        Node right = new_top_level_leaf(VALUE_ON);
 
-        Node left_d1 = new_leaf(VALUE_ON);
-        Node right_d1 = new_leaf(VALUE_ON);
+        Node left_d1 = new_top_level_leaf(VALUE_ON);
+        Node right_d1 = new_top_level_leaf(VALUE_ON);
 
         Node node_d1 = new_fork(&left_d1, &right_d1, COMBINATOR_AND);
 

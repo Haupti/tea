@@ -25,6 +25,7 @@ Value evaluate_fork(Combinator combinator, Value left, Value right){
                 break;
             }
     }
+    err("value evaluation impossible");
 }
 
 Value evaluate_sprout(Modifier modifier, Value value){

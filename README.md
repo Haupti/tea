@@ -13,13 +13,17 @@ and `1 | 1 & 0` raises an exception because its not properly grouped.\
 `1 steve|20` evaluates to 1 because everything except '(', ')', '1', '0', '&', '|' and '!' is ignored.
 
 ## Future plans
+
+### definitive plans
 * comments
+* constants
 * variables
 * update syntax checker when problem occurs
 * functions
-* lists
+* lists or at least something like it, i have a slightly different idea for that
 * io
-there is no need for types. everything is 1 or 0
+### things i think about
+* using LLVM (not at the moment, i want to do it myself once)
 
 ## version feature list (short)
 * **0.0.1 (not tagged)** evaluation of expressions containing '(', ')', '1', '0', '|' and '&'

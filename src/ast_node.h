@@ -4,6 +4,8 @@
 #include <stdlib.h>
 #include "token.h"
 
+#define NODE_TYPE_STR(x) (x == LEAF ? "LEAF" : (x == FORK ? "FORK" : (x == SPROUT ? "SPROUT" : "")))
+
 typedef enum Value {
     VALUE_ON,
     VALUE_OFF
@@ -32,17 +34,35 @@ typedef enum NodeType {
     SPROUT,
 } NodeType;
 
+struct NamedObject;
+
 typedef struct Node {
     NodeType type;
     NodeValue value;
     struct Node * left;
     struct Node * right;
     struct Node * tip;
+    struct NamedObject ** in_scope_named_objects;
+    int in_scope_named_objects_count;
 } Node;
 
-Node new_leaf(Value value);
+
+typedef enum NamedObjectType {
+    OT_CONSTANT,
+} NamedObjectType;
+
+typedef struct NamedObject {
+    NamedObjectType type;
+    char * name;
+    Node * ref;
+} NamedObject;
+
+Node new_leaf(Value value, NamedObject ** in_scope_named_objects, int in_scope_named_objects_count);
 Node new_sprout(Node * tip, Modifier modifier);
 Node new_fork(Node * left, Node * right, Combinator combinator);
+
+NamedObject new_constant(char * name, Node * node);
+void print_named_object(NamedObject object);
 
 /* TODO consider this later, if this becomes useful
 typedef struct Leaf {

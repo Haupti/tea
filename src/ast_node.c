@@ -1,23 +1,23 @@
 #include "ast_node.h"
 #include <stdio.h>
 
-Node new_leaf(Value value){
+Node new_leaf(Value value, NamedObject ** in_scope_named_objects, int in_scope_named_objects_count){
     NodeValue nodeValue;
     nodeValue.value = value;
-    Node node = { LEAF, nodeValue, NULL, NULL, NULL };
+    Node node = { LEAF, nodeValue, NULL, NULL, NULL, in_scope_named_objects, in_scope_named_objects_count};
     return node;
 }
 
 Node new_fork(Node * left, Node * right, Combinator combinator){
     NodeValue nodeValue;
     nodeValue.combinator = combinator;
-    Node node = { FORK, nodeValue, left, right, NULL};
+    Node node = { FORK, nodeValue, left, right, NULL, NULL, 0};
     return node;
 }
 Node new_sprout(Node * tip, Modifier modifier){
     NodeValue nodeValue;
     nodeValue.modifier = modifier;
-    Node node = { SPROUT, nodeValue, NULL, NULL, tip};
+    Node node = { SPROUT, nodeValue, NULL, NULL, tip, NULL, 0};
     return node;
 }
 
@@ -63,3 +63,17 @@ void print_tree(Node node){
             }
     }
 }
+
+NamedObject new_constant(char * name, Node * node){
+    NamedObject named_object = { OT_CONSTANT , name, node };
+    return named_object;
+}
+
+void print_named_object(NamedObject object){
+    switch(object.type){
+        case OT_CONSTANT:
+            printf("NAMED OBJECT: constant { name = %s, ref = %s }", object.name, NODE_TYPE_STR(object.ref->type));
+            break;
+    }
+}
+
