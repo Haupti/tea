@@ -118,8 +118,6 @@ SyntaxVerification verify_syntax(Token * tokens, size_t tokens_len){
             next_token = NULL;
         }
 
-        print_token(&token);
-
         switch(token.type){
             case ON:{
                 consecutive_value_counter += 1;
