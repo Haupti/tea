@@ -26,10 +26,12 @@ typedef union NodeValue{
     enum Value value;
     enum Combinator combinator;
     enum Modifier modifier;
+    char * identifier;
 } NodeValue;
 
 typedef enum NodeType {
     LEAF,
+    OBJECT_LEAF,
     FORK,
     SPROUT,
 } NodeType;
@@ -58,6 +60,7 @@ typedef struct NamedObject {
 } NamedObject;
 
 Node new_leaf(Value value, NamedObject ** in_scope_named_objects, int in_scope_named_objects_count);
+Node new_object_leaf(char * identifier_name, NamedObject ** in_scope_named_objects, int in_scope_named_objects_count);
 Node new_sprout(Node * tip, Modifier modifier);
 Node new_fork(Node * left, Node * right, Combinator combinator);
 

@@ -28,6 +28,11 @@ int is_grp_open(Token token){
     return token.type == GRP_OPEN;
 }
 
+int is_identifier(Token token){
+    return token.type == IDENTIFIER;
+}
+
+
 void print_tokens(Token * tokens, size_t tokens_len){
     for(int i = 0; i < tokens_len; i++){
         print_token(&tokens[i]);

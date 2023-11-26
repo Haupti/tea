@@ -122,8 +122,15 @@ int effective_not_count(Slice slice){
 Node * to_leaf_or_spout_with_leaf(Slice slice, NamedObject ** parent_named_objects, int parent_named_objects_count){
     int not_count = effective_not_count(slice);
 
+    Token value_or_identifier = last_token(slice);
     Node * node = malloc(sizeof(Node));
-    Node temp_leaf = new_leaf(to_value(last_token(slice)), parent_named_objects, parent_named_objects_count);
+    Node temp_leaf;
+    if(is_value(value_or_identifier)){
+        temp_leaf = new_leaf(to_value(value_or_identifier), parent_named_objects, parent_named_objects_count);
+    }
+    else if(is_identifier(value_or_identifier)){
+        temp_leaf = new_object_leaf(value_or_identifier.name, parent_named_objects, parent_named_objects_count);
+    }
     memcpy(node, &temp_leaf, sizeof(Node));
     if(not_count == 0){
         return node;
@@ -206,8 +213,7 @@ Node * create_node_after_value_found(
 
 Node * build_node(Slice slice, NamedObject ** parent_named_objects, int parent_named_objects_count){
 
-
-    NamedObject ** named_objects = NULL;
+    NamedObject ** named_objects = malloc(sizeof(NamedObject*) * parent_named_objects_count);
     memcpy(named_objects, parent_named_objects, sizeof(NamedObject*) * parent_named_objects_count);
     int named_objects_count = parent_named_objects_count;
 
@@ -215,7 +221,7 @@ Node * build_node(Slice slice, NamedObject ** parent_named_objects, int parent_n
 
     // algorithm:
     // searching for either a value or a open bracket
-    // if the first thing found is a value
+    // if the first thing found is a value (or identifier)
     //  -> left side is a leaf/sprout with leaf
     //  -> after value must be combinator
     //  -> after combinator build node from the right side
@@ -225,6 +231,7 @@ Node * build_node(Slice slice, NamedObject ** parent_named_objects, int parent_n
     //  -> after combinator build node from right side
 
     Token token;
+    int significant_token_index = -1;
     int i;
     for(i = slice.start; i <= slice.end; i++){
         token = slice.arr[i];
@@ -249,22 +256,22 @@ Node * build_node(Slice slice, NamedObject ** parent_named_objects, int parent_n
             i = body_slice.end + 1; // jump to statement end token
         }
 
-        if(is_grp_open(token) || is_value(token)) {
-            success = 1;
+        if(is_grp_open(token) || is_value(token) || is_identifier(token)) {
+            significant_token_index = i;
             break;
         }
     };
 
-    if(!success){
+    if(significant_token_index == -1){
         err("while building tree");
     }
     Node * node = malloc(sizeof(Node));
-    if(is_value(token)){
-        int value_index = i;
+    if(is_value(token) || is_identifier(token)){
+        int value_index = significant_token_index;
         return create_node_after_value_found(slice, value_index, named_objects, named_objects_count);
     }else{
         // else must be bracket
-        int bracket_open_pos = i;
+        int bracket_open_pos = significant_token_index;
         return create_node_after_open_bracket_found(slice, bracket_open_pos, named_objects, named_objects_count);
         }
 }
@@ -277,44 +284,3 @@ Node build_tree(Token * tokens, size_t start_token, size_t end_token){
 
     return *build_node(slice, initial_named_objects, initial_named_objects_count);
 }
-
-/*
-(0) search frist bracket, combinator or value
-
-(1A) found bracket first
-    (2) goto end of that bracket
-    (3) this is 1. cursor -> (0) with this cursor
-    (4) check if cursor ends at bracket
-        (4.a) if not search combinator -> everything right of the combinator is the 2. cursor -> (0) with this cursor
-        (4.b) if so -> (5)
-    (5) collect my modifiers and reduce (!! -> no modifier, !!! -> not, ...)
-    (6a) if i have none, return 1. node
-    (6b) if i have one, i am a sprout with 1. node as tip
-
-(1B) found value
-    (2) everything left of the is a leaf -> collect my modifiers and evaluate to a value, this is 1. node
-    (3) the combinator is my node value
-    (3) everything right of the combinator is the 2. node -> (0) with that node
-
-*/
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

@@ -8,6 +8,13 @@ Node new_leaf(Value value, NamedObject ** in_scope_named_objects, int in_scope_n
     return node;
 }
 
+Node new_object_leaf(char * identifier_name, NamedObject ** in_scope_named_objects, int in_scope_named_objects_count){
+    NodeValue nodeValue;
+    nodeValue.identifier = identifier_name;
+    Node node = { OBJECT_LEAF, nodeValue, NULL, NULL, NULL, in_scope_named_objects, in_scope_named_objects_count};
+    return node;
+}
+
 Node new_fork(Node * left, Node * right, Combinator combinator){
     NodeValue nodeValue;
     nodeValue.combinator = combinator;
@@ -33,6 +40,11 @@ void print_tree(Node node){
                         printf("VALUE_OFF");
                         break;
                 }
+                break;
+            }
+        case OBJECT_LEAF:
+            {
+                printf("IDENTIFIER(%s)", node.value.identifier);
                 break;
             }
         case SPROUT:

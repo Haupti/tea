@@ -31,6 +31,7 @@ void show_token(char * destination, Token * token);
 
 int is_value(Token token);
 int is_combinator(Token token);
+int is_identifier(Token token);
 int is_modifier(Token token);
 int is_grp_open(Token token);
 #endif
