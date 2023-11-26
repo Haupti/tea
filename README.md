@@ -15,8 +15,6 @@ and `1 | 1 & 0` raises an exception because its not properly grouped.\
 ## Future plans
 
 ### definitive plans
-* comments
-* constants
 * variables
 * update syntax checker when problem occurs
 * functions
@@ -29,3 +27,4 @@ and `1 | 1 & 0` raises an exception because its not properly grouped.\
 * **0.0.1 (not tagged)** evaluation of expressions containing '(', ')', '1', '0', '|' and '&'
 * **0.0.2** not modifier '!' to prefix groups (brackets), values or values with modifier: `!1 -> 0`, `!!1 -> 0`, `!(!1) | !(0) -> 1`, `!(0 & 1) -> 1` etc..
 * **0.0.3** reimplemented the algorithm: its way faster now. still hard to read.
+* **0.0.4** implement comments and constants. this works now: `set a = 0; (a | set b = 1 b) -- this is a comment` and evaluates to 1
