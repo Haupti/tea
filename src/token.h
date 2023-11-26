@@ -34,4 +34,6 @@ int is_combinator(Token token);
 int is_identifier(Token token);
 int is_modifier(Token token);
 int is_grp_open(Token token);
+int is_grp_close(Token token);
+int is_statement_end(Token token);
 #endif

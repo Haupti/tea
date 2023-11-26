@@ -44,6 +44,8 @@ Value evaluate_leaf(Node * node){
                 return evaluate_node(in_scope_named_objects[i]->ref);
             }
         }
+        printf("ERROR: '%s' is now known here\n", node->value.identifier);
+        exit(EXIT_FAILURE);
     }
     err("value evaluation impossible (leaf)");
     return VALUE_OFF;

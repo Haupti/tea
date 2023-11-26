@@ -22,7 +22,9 @@ int is_word_ending(char c){
     char is_bracket = c == 40 || c == 41 || c == 91 || c == 93 || c == 123 || c == 125;
     char is_quote = c == 96 || c == 34 || c == 39;
     char is_string_terminator = c == 0;
-    return is_bracket || is_whitespace || is_quote || is_string_terminator;
+    char is_equals = c == 61;
+    char is_comma_like = c == 44 || c ==  46 || c == 58 || c == 59;
+    return is_bracket || is_whitespace || is_quote || is_string_terminator || is_equals || is_comma_like;
 }
 
 typedef enum ReadMode {

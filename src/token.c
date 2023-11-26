@@ -28,8 +28,16 @@ int is_grp_open(Token token){
     return token.type == GRP_OPEN;
 }
 
+int is_grp_close(Token token){
+    return token.type == GRP_CLOSE;
+}
+
 int is_identifier(Token token){
     return token.type == IDENTIFIER;
+}
+
+int is_statement_end(Token token){
+    return token.type == STATEMENT_END;
 }
 
 

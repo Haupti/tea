@@ -35,6 +35,18 @@ void print_error_type(SyntaxErrorType type){
         case SYNTX_ERR_TOO_MANY_TOKENS_IN_GROUP:
             printf("SYNTX_ERR_TOO_MANY_TOKENS_IN_GROUP\n");
             break;
+        case SYNTX_ERR_NO_STATEMENT_BEFORE_COMBINATOR:
+            printf("SYNTX_ERR_NO_STATEMENT_BEFORE_COMBINATOR\n");
+            break;
+        case SYNTX_ERR_NO_STATEMENT_BEFORE_GRP_CLOSE:
+            printf("SYNTX_ERR_NO_STATEMENT_BEFORE_GRP_CLOSE\n");
+            break;
+        case SYNTX_ERR_STATEMENT_DOESNT_END:
+            printf("SYNTX_ERR_STATEMENT_DOESNT_END\n");
+            break;
+        case SYNTX_ERR_NO_STATEMENT_TO_END:
+            printf("SYNTX_ERR_NO_STATEMENT_TO_END\n");
+            break;
     }
 }
 
@@ -44,40 +56,49 @@ void print_err_and_exit(SyntaxVerification verification){
         switch(verification.result.error.error_type){
             case SYNTX_ERR_NO_GROUP_TO_CLOSE:{
                     printf("SYNTAX ERROR: closing a group without matching open\n");
-                    printf("SYNTAX ERROR: at token position %d\n", verification.result.error.at_position);
                     break;
                 }
             case SYNTX_ERR_UNCLOSED_GROUP:{
                     printf("SYNTAX ERROR: expecting a ')'\n");
-                    printf("SYNTAX ERROR: at token position %d\n", verification.result.error.at_position);
                     break;
                 }
             case SYNTX_ERR_COMBINATOR_MISSING:{
                     printf("SYNTAX ERROR: missing a combinator\n");
-                    printf("SYNTAX ERROR: at token position %d\n", verification.result.error.at_position);
                     break;
                 }
             case SYNTX_ERR_VALUE_MISSING:{
                     printf("SYNTAX ERROR: missing a value\n");
-                    printf("SYNTAX ERROR: at token position %d\n", verification.result.error.at_position);
                     break;
                 }
             case SYNTX_ERR_TOO_MANY_TOKENS_IN_GROUP:{
                     printf("SYNTAX ERROR: too many tokens in this group. a group can only contain two values and one combinator\n");
-                    printf("SYNTAX ERROR: at token position %d\n", verification.result.error.at_position);
                     break;
                 }
-            default:
-                printf("SYNTAX ERROR: unspecified");
-                printf("SYNTAX ERROR: at token position %d\n", verification.result.error.at_position);
-                break;
+            case SYNTX_ERR_NO_STATEMENT_BEFORE_COMBINATOR:{
+                    printf("SYNTAX ERROR: before a combinator must be a value, there can not be a statement\n");
+                    break;
+                }
+            case SYNTX_ERR_NO_STATEMENT_BEFORE_GRP_CLOSE:{
+                    printf("SYNTAX ERROR: before closing a group must be a value, there can not be a statement\n");
+                    break;
+                }
+            case SYNTX_ERR_STATEMENT_DOESNT_END:{
+                    printf("SYNTAX ERROR: expecting a ';'\n");
+                    break;
+                }
+            case SYNTX_ERR_NO_STATEMENT_TO_END:{
+                    printf("SYNTAX ERROR: no statement to end\n");
+                    break;
+                }
         }
+        printf("SYNTAX ERROR: at token position %d\n", verification.result.error.at_position);
         exit(EXIT_FAILURE);
     }
 }
 
 SyntaxVerification verify_syntax(Token * tokens, size_t tokens_len){
     int bracket_counter = 0;
+    int statement_brackets_counter = 0;
     int consecutive_value_counter = 0;
     int consecutive_combinator_counter = 0;
     int consecutive_value_and_combinator_counter = 0;
@@ -97,43 +118,80 @@ SyntaxVerification verify_syntax(Token * tokens, size_t tokens_len){
             next_token = NULL;
         }
 
+        print_token(&token);
+
         switch(token.type){
-            case ON:
+            case ON:{
                 consecutive_value_counter += 1;
                 consecutive_combinator_counter = 0;
                 consecutive_value_and_combinator_counter += 1;
                 break;
-            case OFF:
+            }
+            case OFF:{
                 consecutive_value_counter += 1;
                 consecutive_combinator_counter = 0;
                 consecutive_value_and_combinator_counter += 1;
                 break;
-            case AND:
+            }
+            case IDENTIFIER:{
+                consecutive_value_counter += 1;
+                consecutive_combinator_counter = 0;
+                consecutive_value_and_combinator_counter += 1;
+                break;
+            }
+            case AND:{
                 consecutive_combinator_counter += 1;
                 consecutive_value_counter = 0;
                 consecutive_value_and_combinator_counter += 1;
                 break;
-            case OR:
+            }
+            case OR:{
                 consecutive_combinator_counter += 1;
                 consecutive_value_counter = 0;
                 consecutive_value_and_combinator_counter += 1;
                 break;
-            case GRP_CLOSE:
+            }
+            case GRP_CLOSE:{
                 bracket_counter -= 1;
                 consecutive_value_counter = 0;
                 consecutive_combinator_counter = 0;
                 consecutive_value_and_combinator_counter = 0;
                 break;
-            case GRP_OPEN:
+            }
+            case GRP_OPEN:{
                 bracket_counter += 1;
                 consecutive_value_counter = 0;
                 consecutive_combinator_counter = 0;
                 consecutive_value_and_combinator_counter = 0;
                 break;
+            }
+            case SET:{
+                statement_brackets_counter += 1;
+                consecutive_value_counter = 0;
+                consecutive_combinator_counter = 0;
+                consecutive_value_and_combinator_counter = 0;
+                break;
+            }
+            case STATEMENT_END:{
+                statement_brackets_counter -= 1;
+                consecutive_value_counter = 0;
+                consecutive_combinator_counter = 0;
+                consecutive_value_and_combinator_counter = 0;
+                break;
+            }
+            case ASSIGNMENT_OPERATOR:{
+                consecutive_combinator_counter = 0;
+                consecutive_value_counter = 0;
+                consecutive_value_and_combinator_counter = 0;
+                break;
+            }
             default:
                 break;
         }
 
+        if(statement_brackets_counter < 0){
+            return verification_with_error(SYNTX_ERR_NO_STATEMENT_TO_END, token, i);
+        }
 
         if(bracket_counter < 0){
             return verification_with_error(SYNTX_ERR_NO_GROUP_TO_CLOSE, token, i);
@@ -155,6 +213,12 @@ SyntaxVerification verify_syntax(Token * tokens, size_t tokens_len){
             continue;
         }
 
+        if(is_statement_end(token) && is_combinator(*next_token)){
+            return verification_with_error(SYNTX_ERR_NO_STATEMENT_BEFORE_COMBINATOR, *next_token, i+1);
+        }
+        if(is_statement_end(token) && is_grp_close(*next_token)){
+            return verification_with_error(SYNTX_ERR_NO_STATEMENT_BEFORE_GRP_CLOSE, *next_token, i+1);
+        }
         if(is_modifier(token) && is_combinator(*next_token)){
             return verification_with_error(SYNTX_ERR_VALUE_MISSING, *next_token, i+1);
         }
@@ -168,6 +232,10 @@ SyntaxVerification verify_syntax(Token * tokens, size_t tokens_len){
 
     if(bracket_counter > 0){
         return verification_with_error(SYNTX_ERR_UNCLOSED_GROUP, token, i);
+    }
+
+    if(statement_brackets_counter > 0){
+        return verification_with_error(SYNTX_ERR_STATEMENT_DOESNT_END, token, i);
     }
 
     return verification_without_error();

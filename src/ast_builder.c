@@ -248,7 +248,7 @@ Node * build_node(Slice slice, NamedObject ** parent_named_objects, int parent_n
             named_objects_count += 1;
             NamedObject ** temp_named_objects = realloc(named_objects, sizeof(NamedObject*) * (named_objects_count));
             if(temp_named_objects == NULL){
-                err("faild to allocate space");
+                err("failed to allocate space");
             }
             named_objects = temp_named_objects;
             named_objects[named_objects_count-1] = temp_named_object;
