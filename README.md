@@ -13,9 +13,9 @@ and `1 | 1 & 0` raises an exception because its not properly grouped.\
 `1 steve|20` evaluates to 1 because everything except '(', ')', '1', '0', '&', '|' and '!' is ignored.
 
 ## Future plans
-* exceptions when finding characters that are now allowed (maybe ?)
-* update syntax checker when problem occurs
+* comments
 * variables
+* update syntax checker when problem occurs
 * functions
 * lists
 * io

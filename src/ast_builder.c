@@ -120,7 +120,6 @@ Node * build_node(Slice slice){
     if(!success){
         err("while building tree");
     }
-
     Node * node = malloc(sizeof(Node));
     if(is_value(token)){
         int value_index = i;

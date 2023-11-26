@@ -2,6 +2,16 @@
 #include <stdio.h>
 #include <string.h>
 
+Token new_token(TokenType type){
+    Token token = {type, NULL};
+    return token;
+}
+
+Token new_identifier_token(TokenType type, char * name){
+    Token token = {type, name};
+    return token;
+}
+
 int is_value(Token token){
     return token.type == ON || token.type == OFF;
 }
@@ -25,7 +35,7 @@ void print_tokens(Token * tokens, size_t tokens_len){
 }
 
 void print_token(Token * token){
-    char token_representation[10];
+    char token_representation[42];
     show_token(token_representation, token);
     printf("%s\n", token_representation);
 }
@@ -53,5 +63,27 @@ void show_token(char * destination, Token * token){
             break;
         case NOT:
             strcpy(destination, "NOT");
+            break;
+        case SET:
+            strcpy(destination, "SET");
+            break;
+        case IDENTIFIER:
+            {
+                char s[42];
+                if(strlen(token->name) > 29){
+                    snprintf(s, 29, "IDENTIFIER(%s...)", token->name);
+                }
+                else {
+                    snprintf(s, 29, "IDENTIFIER(%s)", token->name);
+                }
+                strcpy(destination, s);
+                break;
+            }
+        case ASSIGNMENT_OPERATOR:
+            strcpy(destination, "ASSIGNMENT_OPERATOR");
+            break;
+        case STATEMENT_END:
+            strcpy(destination, "STATEMENT_END");
+            break;
     }
 }
