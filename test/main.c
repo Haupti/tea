@@ -179,49 +179,6 @@ DESCRIBE("read_tokens", {
         ASSERT_EQUALS(grou_slice.start, 1);
         ASSERT_EQUALS(grou_slice.end, 1);
     })
-    TEST("effective not count", {
-        Token even_nots_1[] = ARRAY(new_token(NOT), new_token(NOT), new_token(NOT), new_token(NOT), new_token(ON));
-        Slice en1_slice = new_slice(even_nots_1, 0, 4);
-        int en1_result = effective_not_count(en1_slice);
-        ASSERT_EQUALS(en1_result, 0);
-
-        Token even_nots_2[] = ARRAY(new_token(ON));
-        Slice en2_slice = new_slice(even_nots_2, 0, 0);
-        int en2_result = effective_not_count(en2_slice);
-        ASSERT_EQUALS(en2_result, 0);
-
-        Token odd_nots_1[] = ARRAY(new_token(NOT), new_token(ON));
-        Slice en3_slice = new_slice(odd_nots_1, 0, 1);
-        int en3_result = effective_not_count(en3_slice);
-        ASSERT_EQUALS(en3_result, 1);
-
-        Token odd_nots_2[] = ARRAY(new_token(NOT), new_token(NOT), new_token(NOT), new_token(NOT), new_token(NOT), new_token(ON));
-        Slice en4_slice = new_slice(odd_nots_2, 0, 5);
-        int en4_result = effective_not_count(en4_slice);
-        ASSERT_EQUALS(en4_result, 1);
-    })
-    TEST("creates leaf for even number of nots", {
-        Token tokens[] = ARRAY(new_token(NOT), new_token(NOT), new_token(ON));
-        Slice slice = new_slice(tokens, 0, 2);
-        Node * node =  to_leaf_or_spout_with_leaf(slice);
-        ASSERT_EQUALS(node->type, LEAF);
-        ASSERT_EQUALS(node->value.value, VALUE_ON);
-    })
-    TEST("creates leaf for no modifier", {
-        Token tokens[] = ARRAY(new_token(ON));
-        Slice slice = new_slice(tokens, 0, 0);
-        Node * node =  to_leaf_or_spout_with_leaf(slice);
-        ASSERT_EQUALS(node->type, LEAF);
-        ASSERT_EQUALS(node->value.value, VALUE_ON);
-    })
-    TEST("creates sprout with leaf for odd number of nots", {
-        Token tokens[] = ARRAY(new_token(NOT), new_token(NOT), new_token(NOT), new_token(ON)) ;
-        Slice slice = new_slice(tokens, 0, 3);
-        Node * node =  to_leaf_or_spout_with_leaf(slice);
-        ASSERT_EQUALS(node->type, SPROUT);
-        ASSERT_EQUALS(node->tip->type, LEAF);
-        ASSERT_EQUALS(node->tip->value.value, VALUE_ON);
-    })
     TEST("builds leaf", {
         Token tokens[] = ARRAY(new_token(NOT), new_token(NOT), new_token(ON));
         Node node =  build_tree(tokens,0, 2);

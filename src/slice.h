@@ -12,5 +12,4 @@ typedef struct Slice {
 Slice new_slice(Token * arr, int start, int end);
 
 Token token_at(Slice slice, int index);
-Token last_token(Slice slice);
 #endif

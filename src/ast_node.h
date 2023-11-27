@@ -71,26 +71,6 @@ Node new_fork(Node * left, Node * right, Combinator combinator);
 NamedObject new_constant(char * name, Node * node);
 void print_named_object(NamedObject object);
 
-/* TODO consider this later, if this becomes useful
-typedef struct Leaf {
-    Value value;
-} Leaf;
-
-typedef struct Sprout{
-    Modifier modifier;
-    Node * tip;
-} Sprout;
-
-typedef struct Fork{
-    Combinator combinator;
-    Node * left;
-    Node * right;
-} Fork;
-as_leaf(Node * node);
-as_sprout(Node * node);
-as_fork(Node * node);
-*/
-
 void print_tree(Node node);
 
 #endif
