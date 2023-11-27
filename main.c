@@ -1,4 +1,3 @@
-#include <io.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -36,6 +35,7 @@ int main(int args, char * argv[]){
 
     // build AST / binary tree
     Node tree = build_tree(tokens, 0, tokens_len-1);
+    print_tree(tree);
 
     // evaluate program
     Value val = evaluate_node(&tree);

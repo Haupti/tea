@@ -68,6 +68,18 @@ DESCRIBE("read_tokens", {
         show_token(show, &tokens[5]);
         ASSERT_STR_EQUALS(show,"IDENTIFIER(a)");
     })
+    TEST("reads value definition with additional stuff",{
+        Token tokens[20];
+        char input[] = "set b = (set a = 1; !1 | 1); b";
+        int count = read_tokens(tokens, input , strlen(input));
+        char show[25];
+        char expected[16][25] = ARRAY("SET", "IDENTIFIER(b)", "ASSIGNMENT_OPERATOR", "GRP_OPEN", "SET", "IDENTIFIER(a)", "ASSIGNMENT_OPERATOR", "ON", "STATEMENT_END", "NOT", "ON", "OR", "ON", "GRP_CLOSE", "STATEMENT_END", "IDENTIFIER(b)");
+        ASSERT_EQUALS(count, 16);
+        for(int i = 0; i < count; i++){
+            show_token(show, &tokens[i]) ;
+            ASSERT_STR_EQUALS(show ,expected[i]);
+        }
+    })
     TEST("evaluates leaf",{
         Node node = new_top_level_leaf(VALUE_ON);
         Value value = evaluate_node(&node);

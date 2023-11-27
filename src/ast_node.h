@@ -59,6 +59,10 @@ typedef struct NamedObject {
     Node * ref;
 } NamedObject;
 
+Node * create_leaf(Value value, NamedObject ** named_objects, int named_objects_count);
+Node * create_object_leaf(char * identifier_name, NamedObject ** in_scope_named_objects, int in_scope_named_objects_count);
+Node * create_sprout(Node * leaf, Modifier modifier);
+Node * create_fork(Node * left, Node * right, Combinator combinator);
 Node new_leaf(Value value, NamedObject ** in_scope_named_objects, int in_scope_named_objects_count);
 Node new_object_leaf(char * identifier_name, NamedObject ** in_scope_named_objects, int in_scope_named_objects_count);
 Node new_sprout(Node * tip, Modifier modifier);

@@ -1,5 +1,48 @@
 #include "ast_node.h"
 #include <stdio.h>
+#include <string.h>
+#include "err.h"
+
+Node * create_fork(Node * left, Node * right, Combinator combinator){
+    Node fork = new_fork(left, right, combinator);
+    Node * fork_ptr = malloc(sizeof(Node));
+    if(fork_ptr == NULL){
+        err("cannot allocate space for node");
+    }
+    memcpy(fork_ptr, &fork, sizeof(Node));
+    return fork_ptr;
+}
+
+
+Node * create_object_leaf(char * identifier_name, NamedObject ** in_scope_named_objects, int in_scope_named_objects_count){
+    Node leaf = new_object_leaf(identifier_name, in_scope_named_objects, in_scope_named_objects_count);
+    Node * leaf_ptr = malloc(sizeof(Node));
+    if(leaf_ptr == NULL){
+        err("cannot allocate space for node");
+    }
+    memcpy(leaf_ptr, &leaf, sizeof(Node));
+    return leaf_ptr;
+}
+
+Node * create_leaf(Value value, NamedObject ** named_objects, int named_objects_count){
+    Node leaf = new_leaf(value, named_objects, named_objects_count);
+    Node * leaf_ptr = malloc(sizeof(Node));
+    if(leaf_ptr == NULL){
+        err("cannot allocate space for node");
+    }
+    memcpy(leaf_ptr, &leaf, sizeof(Node));
+    return leaf_ptr;
+}
+
+Node * create_sprout(Node * leaf, Modifier modifier){
+    Node sprout = new_sprout(leaf, modifier);
+    Node * sprout_ptr = malloc(sizeof(Node));
+    if(sprout_ptr == NULL){
+        err("cannot allocate space for node");
+    }
+    memcpy(sprout_ptr, &sprout, sizeof(Node));
+    return sprout_ptr;
+}
 
 Node new_leaf(Value value, NamedObject ** in_scope_named_objects, int in_scope_named_objects_count){
     NodeValue nodeValue;
