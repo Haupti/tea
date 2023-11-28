@@ -49,7 +49,6 @@ typedef struct IdentifierIndexPair {
     char * identifier_name;
     int index;
 } IdentifierIndexPair;
-// set a = (a | a) | a;
 
 SanityCheck perform_sanity_check(Slice slice){
     // i dont want to deal with malloc here
@@ -61,7 +60,6 @@ SanityCheck perform_sanity_check(Slice slice){
     int uses_identifiers_index = 0;
 
     // scan for assignments
-
     Token token;
     int i;
     for(i = slice.start; i <= slice.end; i++){
@@ -104,17 +102,25 @@ SanityCheck perform_sanity_check(Slice slice){
         }
     }
 
+    // search for use before assignment
     int l;
     int m;
     IdentifierIndexPair assigned;
     IdentifierIndexPair use;
     for(l = 0; l < uses_identifiers_index; l++){
+        int was_assigned_anywhere = 0;
         use = uses_identifiers[l];
         for(m = 0; m < assigned_identifies_index; m++){
             assigned = assigned_identifies[m];
-            if(strcmp(assigned.identifier_name, use.identifier_name) == 0 && assigned.index > use.index){
-                return sanity_check_with_error(SNITY_ERR_USE_BEFORE_ASSIGNMENT, slice.arr[l], l);
+            if(strcmp(assigned.identifier_name, use.identifier_name) == 0){
+                was_assigned_anywhere = 1;
+                if(assigned.index > use.index){
+                    return sanity_check_with_error(SNITY_ERR_USE_BEFORE_ASSIGNMENT, slice.arr[use.index], use.index);
+                }
             }
+        }
+        if(!was_assigned_anywhere){
+            return sanity_check_with_error(SNITY_ERR_USE_BEFORE_ASSIGNMENT, slice.arr[use.index],use.index);
         }
     }
 
