@@ -25,42 +25,99 @@ typedef struct Assignment {
    Slice body;
 } Assignment;
 
-// returns 0 if not found, 1 for use before assignment and 2 for overwrite
-int has_use_or_overwrite_of_identifier(Slice slice, Token identifier){
+// returns 1 if identifier is used, 2 if overwritten/shadowed and 0 if everything is fine
+int has_use_of_identifier(Slice slice, Token identifier){
     Token token;
     int i;
     for(i = slice.start; i <= slice.end; i++){
         token = slice.arr[i];
+        if(token.type == IDENTIFIER && strcmp(token.name, identifier.name) == 0){
+            return 1;
+        }
         if(token.type == SET){
             Token next_token = slice.arr[i+1];
             if(strcmp(next_token.name, identifier.name) == 0){
                 return 2;
             }
         }
-        if(token.type == IDENTIFIER && strcmp(token.name, identifier.name) == 0){
-            return 1;
-        }
+
     }
     return 0;
 }
 
+typedef struct IdentifierIndexPair {
+    char * identifier_name;
+    int index;
+} IdentifierIndexPair;
+// set a = (a | a) | a;
+
 SanityCheck perform_sanity_check(Slice slice){
+    // i dont want to deal with malloc here
+    int max_assignments = ((slice.end - slice.start + 1) / 5 ) + 5;
+    int max_uses = ((slice.end - slice.start + 1) / 3 ) + 5; // estimation, might be too high
+    IdentifierIndexPair assigned_identifies[max_assignments];
+    IdentifierIndexPair uses_identifiers[max_uses];
+    int assigned_identifies_index = 0;
+    int uses_identifiers_index = 0;
+
+    // scan for assignments
+
     Token token;
     int i;
     for(i = slice.start; i <= slice.end; i++){
         token = slice.arr[i];
         if(token.type == SET){
             Token next_token = slice.arr[i+1];
+
+            // problems within the assignment
             Slice assignment_body = find_assignment_body(new_slice(slice.arr,i,slice.end));
-            int is_contains_identifier = has_use_or_overwrite_of_identifier(assignment_body,next_token);
+            int is_contains_identifier = has_use_of_identifier(assignment_body,next_token);
             if(is_contains_identifier == 1){
                 return sanity_check_with_error(SNITY_ERR_USE_BEFORE_ASSIGNMENT, next_token, i+1);
             }
-            else if(is_contains_identifier == 2){
+            if(is_contains_identifier == 2){
                 return sanity_check_with_error(SNITY_ERR_NO_OVERWRITE, next_token, i+1);
+            }
+
+            // for later checks of overwrite etc
+            IdentifierIndexPair pair = {next_token.name, i+1};
+            assigned_identifies[assigned_identifies_index] = pair;
+            assigned_identifies_index += 1;
+        }
+        if(token.type == IDENTIFIER && ((i != slice.start && slice.arr[i-1].type != SET) || i == slice.start)){
+            IdentifierIndexPair pair = {token.name, i};
+            uses_identifiers[uses_identifiers_index] = pair;
+            uses_identifiers_index += 1;
+        }
+
+    }
+    // search for duplicates
+    int j;
+    int k;
+    for(j = 0;  j < assigned_identifies_index; j++){
+        for(k = 0;  k < assigned_identifies_index; k++){
+            if(j == k) continue;
+            if(strcmp(assigned_identifies[j].identifier_name, assigned_identifies[k].identifier_name) == 0){
+                IdentifierIndexPair found_dup = assigned_identifies[k];
+                return sanity_check_with_error(SNITY_ERR_NO_OVERWRITE, slice.arr[found_dup.index], found_dup.index);
             }
         }
     }
+
+    int l;
+    int m;
+    IdentifierIndexPair assigned;
+    IdentifierIndexPair use;
+    for(l = 0; l < uses_identifiers_index; l++){
+        use = uses_identifiers[l];
+        for(m = 0; m < assigned_identifies_index; m++){
+            assigned = assigned_identifies[m];
+            if(strcmp(assigned.identifier_name, use.identifier_name) == 0 && assigned.index > use.index){
+                return sanity_check_with_error(SNITY_ERR_USE_BEFORE_ASSIGNMENT, slice.arr[l], l);
+            }
+        }
+    }
+
     return sanity_check_without_error();
 }
 
