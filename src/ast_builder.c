@@ -128,7 +128,9 @@ int is_allowed_token_after_assignment_end(Token token){
 }
 
 Node * build_node(Slice slice, NamedObject ** parent_named_objects, int parent_named_objects_count);
-Node * create_leaf_or_sprout(Slice slice, NamedObject ** in_scope_named_objects, int in_scope_named_objects_count){
+
+// expects slice to only contain tokens of the node to create i.e. the assignments must be collected before calling this
+Node * create_from_unforked_body(Slice slice, NamedObject ** in_scope_named_objects, int in_scope_named_objects_count){
         Token current_token;
         int nots = 0;
         int current_token_pos;
@@ -217,7 +219,7 @@ Node * build_node(Slice slice, NamedObject ** parent_named_objects, int parent_n
     int combinator_pos = combinator_position(slice);
     if(combinator_pos == -1){
         Slice slice_without_assignments = new_slice(slice.arr, after_assignments_end,slice.end);
-        create_leaf_or_sprout(slice_without_assignments, named_objects , named_objects_count );
+        return create_from_unforked_body(slice_without_assignments, named_objects , named_objects_count );
     }
     else {
         Slice left_slice = {slice.arr, after_assignments_end, combinator_pos - 1};
