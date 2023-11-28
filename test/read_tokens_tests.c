@@ -59,7 +59,8 @@ MODULAR_DESCRIBE(read_tokens_tests,{
     TEST("reads value definition with additional stuff",{
         Token tokens[20];
         char input[] = "set b = (set a = 1; !1 | 1); b";
-        int count = read_tokens(tokens, input , strlen(input));
+        printf("STRLEN %ld\n", strlen(input));
+        int count = read_tokens(tokens, input , strlen(input)+1);
         char show[25];
         char expected[16][25] = ARRAY("SET", "IDENTIFIER(b)", "ASSIGNMENT_OPERATOR", "GRP_OPEN", "SET", "IDENTIFIER(a)", "ASSIGNMENT_OPERATOR", "ON", "STATEMENT_END", "NOT", "ON", "OR", "ON", "GRP_CLOSE", "STATEMENT_END", "IDENTIFIER(b)");
         ASSERT_INT_EQUALS(count, 16);

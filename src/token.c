@@ -7,8 +7,8 @@ Token new_token(TokenType type){
     return token;
 }
 
-Token new_identifier_token(TokenType type, char * name){
-    Token token = {type, name};
+Token new_identifier_token(char * name){
+    Token token = {IDENTIFIER, name};
     return token;
 }
 

@@ -51,7 +51,7 @@ void print_error_type(SyntaxErrorType type){
 }
 
 
-void print_err_and_exit(SyntaxVerification verification){
+void print_syntx_err_and_exit(SyntaxVerification verification){
     if(verification.has_error){
         switch(verification.result.error.error_type){
             case SYNTX_ERR_NO_GROUP_TO_CLOSE:{

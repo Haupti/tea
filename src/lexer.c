@@ -69,7 +69,7 @@ int read_tokens(Token * tokens, char * input, size_t input_len){
                     char * name = malloc(sizeof(char) * (word_index));
                     strcpy(name, word);
                     word_index = 0;
-                    tokens[token_index] = new_identifier_token(IDENTIFIER, name);
+                    tokens[token_index] = new_identifier_token(name);
                     token_index += 1;
                 }
                 read_mode = DEFAULT;

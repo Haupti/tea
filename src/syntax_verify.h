@@ -34,7 +34,7 @@ typedef struct SyntaxVerification {
 SyntaxVerification verify_syntax(Token * tokens, size_t tokens_len);
 
 // does not exit if it has no error
-void print_err_and_exit(SyntaxVerification verification);
+void print_syntx_err_and_exit(SyntaxVerification verification);
 
 void print_error_type(SyntaxErrorType type);
 #endif

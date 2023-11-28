@@ -23,7 +23,7 @@ typedef struct Token {
 } Token;
 
 Token new_token(TokenType type);
-Token new_identifier_token(TokenType type, char * name);
+Token new_identifier_token(char * name);
 
 void print_tokens(Token * tokens, size_t tokens_len);
 void print_token(Token * token);

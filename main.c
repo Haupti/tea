@@ -7,6 +7,7 @@
 #include "src/lexer.h"
 #include "src/ast_builder.h"
 #include "src/ast_evaluate.h"
+#include "src/sanity_check.h"
 #include "src/syntax_verify.h"
 #include "src/token.h"
 #include "src/err.h"
@@ -30,8 +31,11 @@ int main(int args, char * argv[]){
 
     // syntax check
     SyntaxVerification syntax_verification = verify_syntax(tokens, tokens_len);
-    print_err_and_exit(syntax_verification);
+    print_syntx_err_and_exit(syntax_verification);
 
+    // sanity check
+    SanityCheck snty_check = sanity_check(tokens, tokens_len);
+    print_snty_err_and_exit(snty_check);
 
     // build AST / binary tree
     Node tree = build_tree(tokens, 0, tokens_len-1);
