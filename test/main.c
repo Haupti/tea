@@ -45,7 +45,7 @@ DESCRIBE("read_tokens", {
     TEST("ignores comment until newline",{
         Token tokens[10];
         int count = read_tokens(tokens, "-- comment\n 1", 13);
-        ASSERT_EQUALS(count,1);
+        ASSERT_INT_EQUALS(count,1);
         char show[20];
         show_token(show, &tokens[0]);
         ASSERT_STR_EQUALS(show,"ON");
@@ -74,7 +74,7 @@ DESCRIBE("read_tokens", {
         int count = read_tokens(tokens, input , strlen(input));
         char show[25];
         char expected[16][25] = ARRAY("SET", "IDENTIFIER(b)", "ASSIGNMENT_OPERATOR", "GRP_OPEN", "SET", "IDENTIFIER(a)", "ASSIGNMENT_OPERATOR", "ON", "STATEMENT_END", "NOT", "ON", "OR", "ON", "GRP_CLOSE", "STATEMENT_END", "IDENTIFIER(b)");
-        ASSERT_EQUALS(count, 16);
+        ASSERT_INT_EQUALS(count, 16);
         for(int i = 0; i < count; i++){
             show_token(show, &tokens[i]) ;
             ASSERT_STR_EQUALS(show ,expected[i]);
@@ -121,54 +121,54 @@ DESCRIBE("read_tokens", {
     TEST("verifies no open bracket before closing bracket",{
         Token tokens[] = ARRAY(new_token(ON), new_token(GRP_CLOSE), new_token(ON), new_token(GRP_OPEN));
         SyntaxVerification result = verify_syntax(tokens,4);
-        ASSERT_EQUALS(result.has_error, 1);
+        ASSERT_INT_EQUALS(result.has_error, 1);
         ASSERT_EQUALS(result.result.error.error_type, SYNTX_ERR_NO_GROUP_TO_CLOSE);
     })
     TEST("verifies no unclosed bracket",{
         Token tokens[] = ARRAY(new_token(ON), new_token(GRP_OPEN), new_token(GRP_OPEN), new_token(ON), new_token(GRP_CLOSE));
         SyntaxVerification result = verify_syntax(tokens,5);
-        ASSERT_EQUALS(result.has_error, 1);
+        ASSERT_INT_EQUALS(result.has_error, 1);
         ASSERT_EQUALS(result.result.error.error_type, SYNTX_ERR_UNCLOSED_GROUP);
     })
     TEST("verifies no error",{
         Token tokens[] = ARRAY(new_token(ON), new_token(AND) ,new_token(GRP_OPEN), new_token(GRP_OPEN), new_token(ON), new_token(GRP_CLOSE), new_token(GRP_CLOSE));
         SyntaxVerification result = verify_syntax(tokens,7);
-        ASSERT_EQUALS(result.has_error, 0);
+        ASSERT_INT_EQUALS(result.has_error, 0);
     })
     TEST("verifies no empty bracket",{
         Token tokens[] = ARRAY(new_token(GRP_OPEN), new_token(GRP_CLOSE));
         SyntaxVerification result = verify_syntax(tokens,2);
-        ASSERT_EQUALS(result.has_error, 1);
+        ASSERT_INT_EQUALS(result.has_error, 1);
         ASSERT_EQUALS(result.result.error.error_type, SYNTX_ERR_VALUE_MISSING);
     })
     TEST("verifies no value followed by value",{
         Token tokens[] = ARRAY(new_token(ON), new_token(OFF));
         SyntaxVerification result = verify_syntax(tokens,2);
-        ASSERT_EQUALS(result.has_error, 1);
+        ASSERT_INT_EQUALS(result.has_error, 1);
         ASSERT_EQUALS(result.result.error.error_type, SYNTX_ERR_COMBINATOR_MISSING);
     })
     TEST("verifies no value followed by value even with combinator",{
         Token tokens[] = ARRAY(new_token(ON), new_token(NOT), new_token(OFF));
         SyntaxVerification result = verify_syntax(tokens,3);
-        ASSERT_EQUALS(result.has_error, 1);
+        ASSERT_INT_EQUALS(result.has_error, 1);
         ASSERT_EQUALS(result.result.error.error_type, SYNTX_ERR_COMBINATOR_MISSING);
     })
     TEST("verifies no combinator followed by combinator",{
         Token tokens[] = ARRAY(new_token(AND), new_token(OR));
         SyntaxVerification result = verify_syntax(tokens,2);
-        ASSERT_EQUALS(result.has_error, 1);
+        ASSERT_INT_EQUALS(result.has_error, 1);
         ASSERT_EQUALS(result.result.error.error_type, SYNTX_ERR_VALUE_MISSING);
     })
     TEST("verifies not to many elements in group",{
         Token tokens[] = ARRAY(new_token(GRP_OPEN), new_token(ON), new_token(AND), new_token(OFF), new_token(OR), new_token(ON), new_token(GRP_CLOSE));
         SyntaxVerification result = verify_syntax(tokens,7);
-        ASSERT_EQUALS(result.has_error, 1);
+        ASSERT_INT_EQUALS(result.has_error, 1);
         ASSERT_EQUALS(result.result.error.error_type, SYNTX_ERR_TOO_MANY_TOKENS_IN_GROUP);
     })
     TEST("verifies not to many elements top level",{
         Token tokens[] = ARRAY(new_token(ON), new_token(AND), new_token(OFF), new_token(OR), new_token(ON));
         SyntaxVerification result = verify_syntax(tokens,5);
-        ASSERT_EQUALS(result.has_error, 1);
+        ASSERT_INT_EQUALS(result.has_error, 1);
         ASSERT_EQUALS(result.result.error.error_type, SYNTX_ERR_TOO_MANY_TOKENS_IN_GROUP);
     })
     TEST("cuts group slice to size (cuts off end after group close and the brackets)", {
@@ -176,8 +176,8 @@ DESCRIBE("read_tokens", {
         Slice slice = new_slice(tokens, 0, 3);
         Slice grou_slice = cut_group_slice_to_size(slice);
 
-        ASSERT_EQUALS(grou_slice.start, 1);
-        ASSERT_EQUALS(grou_slice.end, 1);
+        ASSERT_INT_EQUALS(grou_slice.start, 1);
+        ASSERT_INT_EQUALS(grou_slice.end, 1);
     })
     TEST("builds leaf", {
         Token tokens[] = ARRAY(new_token(NOT), new_token(NOT), new_token(ON));

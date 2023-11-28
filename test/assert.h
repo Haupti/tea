@@ -18,6 +18,14 @@
 };
 #define XTEST(x,y) {printf("    SKIPPED TEST "#x"\n"); }
 
+#define ASSERT_INT_EQUALS(x,y) {\
+    assertion_count += 1;\
+    if(x!=y){\
+        failure_count += 1;\
+        printf("    FAILURE IN TEST \"%s\". failed in assertion %d: expected %d==%d, but was not.\n", test_name, assertion_count, x, y);\
+    }\
+}
+
 #define ASSERT_EQUALS(x,y) {\
     assertion_count += 1;\
     if(x!=y){\
