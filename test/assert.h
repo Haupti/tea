@@ -1,8 +1,20 @@
 #ifndef ASSERT_HEADER
 #define ASSERT_HEADER
 
+#define RUN_DESCRIBE_MODULE(describeFunctionName) describeFunctionName();
+
+#define MODULAR_DESCRIBE_H(describeFunctionName) int describeFunctionName();
+
+#define MODULAR_DESCRIBE(describeFunctionName,y) int describeFunctionName(){\
+    printf("DESCRIBE " #describeFunctionName ":\n");\
+    int tests_failure_count = 0;\
+    y\
+    return tests_failure_count;\
+}
+
 #define DESCRIBE(x,y) int main(){\
     printf("DESCRIBE " #x ":\n");\
+    int tests_failure_count = 0;\
     y\
     return 0;\
 }
@@ -15,7 +27,11 @@
     if(failure_count == 0){\
         printf("    SUCCESSFUL TEST "#x"\n");\
     }\
+    else {\
+        tests_failure_count +=1;\
+    } \
 };
+
 #define XTEST(x,y) {printf("    SKIPPED TEST "#x"\n"); }
 
 #define ASSERT_INT_EQUALS(x,y) {\

@@ -13,6 +13,8 @@
 
 int main(int args, char * argv[]){
 
+    puts((strrchr(__FILE__, '/') ? strrchr(__FILE__, '/') + 1 : __FILE__));
+    return EXIT_SUCCESS; // TODO
     if(args != 2){
         puts("expected exaclty one argument (filename)");
         return EXIT_FAILURE;
