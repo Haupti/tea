@@ -17,6 +17,7 @@ and `1 | 1 & 0` raises an exception because its not properly grouped.\
 ### definitive plans
 * variables
 * update syntax checker when problem occurs
+* update sanity checker when problem occurs
 * functions
 * lists or at least something like it, i have a slightly different idea for that
 * io
@@ -29,3 +30,24 @@ and `1 | 1 & 0` raises an exception because its not properly grouped.\
 * **0.0.3** reimplemented the algorithm: its way faster now. still hard to read.
 * **0.0.4** implement comments and constants. this works now: `set a = 0; (a | set b = 1 b) -- this is a comment` and evaluates to 1
 * **0.0.5** reimplement the algorith again: it actually works correctly now and is easier to understand
+* **0.0.6** add sanity checker so more problems are 'pre-execution time errors' (see long description)
+
+## version feature list (long)
+### 0.0.6
+i know this is an interpreted language. \
+however, it works in several phases:
+1. the lexing/tokenizing (pretty standart)
+2. syntax verification, this checks for:
+    - unclosed brackets
+    - closed brackets before open
+    - incomplete assignments
+    - assignments directly before a combinator (&,|)
+    - directly chained combinators (1 | | 1)
+    - some other stuff
+3. sanity check, this checks for:
+    - use before assignment of values
+    - duplicate assignment/ overwrite: `set a = 1; set a = 0; a` is not allowed, same for `set a = (set a = 1; a); a`
+    - some other stuff
+4. building the binary tree starting from the entrypoint
+5. THEN the tree is evaluated
+so when i write 'pre-execution time' i mean any phase before actuall evaluating the tree.
