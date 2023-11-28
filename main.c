@@ -13,8 +13,6 @@
 
 int main(int args, char * argv[]){
 
-    puts((strrchr(__FILE__, '/') ? strrchr(__FILE__, '/') + 1 : __FILE__));
-    return EXIT_SUCCESS; // TODO
     if(args != 2){
         puts("expected exaclty one argument (filename)");
         return EXIT_FAILURE;
@@ -37,11 +35,12 @@ int main(int args, char * argv[]){
 
     // build AST / binary tree
     Node tree = build_tree(tokens, 0, tokens_len-1);
+    printf("DEBUG: tree:\n");
     print_tree(tree);
+    printf("\n");
 
     // evaluate program
     Value val = evaluate_node(&tree);
-;
     switch(val){
         case VALUE_ON:
             puts("1");

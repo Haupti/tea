@@ -127,6 +127,52 @@ int is_allowed_token_after_assignment_end(Token token){
     return is_value(token) || token.type == NOT || token.type == IDENTIFIER || is_grp_open(token);
 }
 
+Node * build_node(Slice slice, NamedObject ** parent_named_objects, int parent_named_objects_count);
+Node * create_leaf_or_sprout(Slice slice, NamedObject ** in_scope_named_objects, int in_scope_named_objects_count){
+        Token current_token;
+        int nots = 0;
+        int current_token_pos;
+        for(current_token_pos = slice.start; current_token_pos <= slice.end; current_token_pos++){
+            current_token = slice.arr[current_token_pos];
+            if(current_token.type == NOT){
+                nots = (nots + 1) % 2;
+            }
+            else if(is_value(current_token)) {
+                Node * leaf = create_leaf(to_value(current_token), in_scope_named_objects, in_scope_named_objects_count);
+                if(nots != 0){
+                    return create_sprout(leaf, MODIFIER_NOT);
+                }
+                else {
+                    return leaf;
+                }
+                break;
+            }
+            else if(is_identifier(current_token)){
+                Node * leaf = create_object_leaf(current_token.name, in_scope_named_objects, in_scope_named_objects_count);
+                if(nots != 0){
+                    return create_sprout(leaf, MODIFIER_NOT);
+                }
+                else {
+                    return leaf;
+                }
+                break;
+            }
+            else if(is_grp_open(current_token)){
+                Slice grp_body_slice = cut_group_slice_to_size(new_slice(slice.arr, current_token_pos, slice.end));
+                Node * node = build_node(grp_body_slice, in_scope_named_objects, in_scope_named_objects_count);
+                if(nots != 0){
+                    return create_sprout(node, MODIFIER_NOT);
+                }
+                else {
+                    return node;
+                }
+                break;
+            }
+        }
+        err("while building tree: expected a valid token");
+        return NULL;
+}
+
 // TODO refactor
 Node * build_node(Slice slice, NamedObject ** parent_named_objects, int parent_named_objects_count){
 
@@ -170,48 +216,8 @@ Node * build_node(Slice slice, NamedObject ** parent_named_objects, int parent_n
 
     int combinator_pos = combinator_position(slice);
     if(combinator_pos == -1){
-        Token current_token;
-        int nots = 0;
-        int current_token_pos;
-        for(current_token_pos = after_assignments_end; current_token_pos <= slice.end; current_token_pos++){
-            current_token = slice.arr[current_token_pos];
-            if(current_token.type == NOT){
-                nots = (nots + 1) % 2;
-            }
-            else if(is_value(current_token)) {
-                Node * leaf = create_leaf(to_value(current_token), named_objects, named_objects_count);
-                if(nots != 0){
-                    return create_sprout(leaf, MODIFIER_NOT);
-                }
-                else {
-                    return leaf;
-                }
-                break;
-            }
-            else if(is_identifier(current_token)){
-                Node * leaf = create_object_leaf(current_token.name, named_objects, named_objects_count);
-                if(nots != 0){
-                    return create_sprout(leaf, MODIFIER_NOT);
-                }
-                else {
-                    return leaf;
-                }
-                break;
-            }
-            else if(is_grp_open(current_token)){
-                Slice grp_body_slice = cut_group_slice_to_size(new_slice(slice.arr, current_token_pos, slice.end));
-                Node * node = build_node(grp_body_slice, named_objects, named_objects_count);
-                if(nots != 0){
-                    return create_sprout(node, MODIFIER_NOT);
-                }
-                else {
-                    return node;
-                }
-                break;
-            }
-        }
-        err("while building tree: expected a valid token");
-        return NULL;
+        Slice slice_without_assignments = new_slice(slice.arr, after_assignments_end,slice.end);
+        create_leaf_or_sprout(slice_without_assignments, named_objects , named_objects_count );
     }
     else {
         Slice left_slice = {slice.arr, after_assignments_end, combinator_pos - 1};
