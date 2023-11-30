@@ -65,6 +65,26 @@ int read_tokens(Token * tokens, char * input, size_t input_len){
                     tokens[token_index] = new_token(SET);
                     token_index += 1;
                 }
+                else if(strcmp(word, "in") == 0){
+                    tokens[token_index] = new_token(STATEMENT_END);
+                    token_index += 1;
+                }
+                else if(strcmp(word, "if") == 0){
+                    tokens[token_index] = new_token(IF);
+                    token_index += 1;
+                }
+                else if(strcmp(word, "then") == 0){
+                    tokens[token_index] = new_token(THEN);
+                    token_index += 1;
+                }
+                else if(strcmp(word, "else") == 0){
+                    tokens[token_index] = new_token(ELSE);
+                    token_index += 1;
+                }
+                else if(strcmp(word, "end") == 0){
+                    tokens[token_index] = new_token(END);
+                    token_index += 1;
+                }
                 else{
                     char * name = malloc(sizeof(char) * (word_index));
                     strcpy(name, word);
@@ -139,13 +159,6 @@ int read_tokens(Token * tokens, char * input, size_t input_len){
                     if(comment_counter == 2){
                         read_mode = COMMENT;
                     }
-                    break;
-                }
-            case ';':
-                {
-                    Token token = {STATEMENT_END};
-                    tokens[token_index] = token;
-                    token_index += 1;
                     break;
                 }
             case '=':

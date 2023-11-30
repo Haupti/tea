@@ -98,5 +98,17 @@ void show_token(char * destination, Token * token){
         case STATEMENT_END:
             strcpy(destination, "STATEMENT_END");
             break;
+        case IF:
+            strcpy(destination, "IF");
+            break;
+        case THEN:
+            strcpy(destination, "THEN");
+            break;
+        case ELSE:
+            strcpy(destination, "ELSE");
+            break;
+        case END:
+            strcpy(destination, "END");
+            break;
     }
 }

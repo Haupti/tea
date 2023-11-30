@@ -35,6 +35,43 @@ typedef enum NodeType {
     FORK,
     SPROUT,
 } NodeType;
+/* TODO
+ * make the different node types structs
+ * typedef struct Leaf {
+ *      enum Value value;
+ * } Leaf;
+ *
+ * typedef struct ObjectLeaf {
+ *      enum NamedObject ** in_scope_named_objects;
+ *      int in_scope_named_objects_count;
+ *      char * name;
+ * } ObjectLeaf;
+ *
+ * typedef struct Sprout {
+ *      struct Node * tip;
+ *      enum Modifier modifier;
+ * } Sprout;
+ *
+ * typedef struct Fork {
+ *      struct Node * left;
+ *      struct Node * right;
+ *      enum Combinator combinator;
+ * } Fork;
+ *
+ * typedef struct Conditional {
+ *      enum NamedObject ** in_scope_named_objects;
+ *      int in_scope_named_objects_count;
+ *      struct Node * condition;
+ *      struct Node * then;
+ *      struct Node * else;
+ * } Conditional;
+ *
+ * typedef struct Node {
+ *      enum NodeType type;
+ *      .... somethign here
+ * }
+ *
+ */
 
 struct NamedObject;
 

@@ -15,6 +15,10 @@ typedef enum TokenType {
     IDENTIFIER,
     ASSIGNMENT_OPERATOR,
     STATEMENT_END,
+    IF,
+    THEN,
+    ELSE,
+    END
 } TokenType;
 
 typedef struct Token {
