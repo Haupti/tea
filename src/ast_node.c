@@ -14,8 +14,8 @@ Node * create_fork(Node * left, Node * right, Combinator combinator){
 }
 
 
-Node * create_object_leaf(char * identifier_name, NamedObject ** in_scope_named_objects, int in_scope_named_objects_count){
-    Node leaf = new_object_leaf(identifier_name, in_scope_named_objects, in_scope_named_objects_count);
+Node * create_object_leaf(char * identifier_name, NamedLeaf ** in_scope_named_leafs, int in_scope_named_leafs_count){
+    Node leaf = new_named_leaf(identifier_name, in_scope_named_leafs, in_scope_named_leafs_count);
     Node * leaf_ptr = malloc(sizeof(Node));
     if(leaf_ptr == NULL){
         err("cannot allocate space for node");
@@ -24,8 +24,8 @@ Node * create_object_leaf(char * identifier_name, NamedObject ** in_scope_named_
     return leaf_ptr;
 }
 
-Node * create_leaf(Value value, NamedObject ** named_objects, int named_objects_count){
-    Node leaf = new_leaf(value, named_objects, named_objects_count);
+Node * create_leaf(Value value){
+    Node leaf = new_leaf(value);
     Node * leaf_ptr = malloc(sizeof(Node));
     if(leaf_ptr == NULL){
         err("cannot allocate space for node");
@@ -44,30 +44,34 @@ Node * create_sprout(Node * leaf, Modifier modifier){
     return sprout_ptr;
 }
 
-Node new_leaf(Value value, NamedObject ** in_scope_named_objects, int in_scope_named_objects_count){
-    NodeValue nodeValue;
-    nodeValue.value = value;
-    Node node = { LEAF, nodeValue, NULL, NULL, NULL, in_scope_named_objects, in_scope_named_objects_count};
+Node new_leaf(Value value){
+    Leaf leaf = { value };
+    union NodeI node_i;
+    node_i.leaf = leaf;
+    Node node = { LEAF, node_i };
     return node;
 }
 
-Node new_object_leaf(char * identifier_name, NamedObject ** in_scope_named_objects, int in_scope_named_objects_count){
-    NodeValue nodeValue;
-    nodeValue.identifier = identifier_name;
-    Node node = { OBJECT_LEAF, nodeValue, NULL, NULL, NULL, in_scope_named_objects, in_scope_named_objects_count};
+Node new_named_leaf(char * identifier_name, NamedLeaf ** in_scope_named_leafs, int in_scope_named_leafs_count){
+    NamedLeaf named_leaf = { LT_CONSTANT, identifier_name, in_scope_named_leafs, in_scope_named_leafs_count };
+    union NodeI node_i;
+    node_i.named_leaf = named_leaf;
+    Node node = { NAMED_LEAF, node_i};
     return node;
 }
 
 Node new_fork(Node * left, Node * right, Combinator combinator){
-    NodeValue nodeValue;
-    nodeValue.combinator = combinator;
-    Node node = { FORK, nodeValue, left, right, NULL, NULL, 0};
+    Fork fork = { left, right, combinator };
+    union NodeI node_i;
+    node_i.fork = fork;
+    Node node = { FORK, node_i};
     return node;
 }
 Node new_sprout(Node * tip, Modifier modifier){
-    NodeValue nodeValue;
-    nodeValue.modifier = modifier;
-    Node node = { SPROUT, nodeValue, NULL, NULL, tip, NULL, 0};
+    Sprout sprout = { tip, modifier };
+    union NodeI node_i;
+    node_i.sprout = sprout;
+    Node node = { SPROUT, node_i};
     return node;
 }
 
@@ -75,7 +79,8 @@ void print_tree(Node node){
     switch(node.type){
         case LEAF:
             {
-                switch(node.value.value){
+                Leaf leaf = node.it.leaf;
+                switch(leaf.value){
                     case VALUE_ON:
                         printf("VALUE_ON");
                         break;
@@ -85,27 +90,30 @@ void print_tree(Node node){
                 }
                 break;
             }
-        case OBJECT_LEAF:
+        case NAMED_LEAF:
             {
-                printf("IDENTIFIER(%s)", node.value.identifier);
+                NamedLeaf named_leaf = node.it.named_leaf;
+                printf("IDENTIFIER(%s)", named_leaf.name);
                 break;
             }
         case SPROUT:
             {
-                if(node.value.modifier == MODIFIER_NOT){
+                Sprout sprout = node.it.sprout;
+                if(sprout.modifier == MODIFIER_NOT){
                     printf("!(");
                 }
                 else {
                     printf("(");
                 }
-                print_tree(*node.tip);
+                print_tree(*sprout.tip);
                 printf(")");
                 break;
             }
         case FORK:
             {
-                print_tree(*node.left);
-                switch(node.value.combinator){
+                Fork fork = node.it.fork;
+                print_tree(*fork.left);
+                switch(fork.combinator){
                     case COMBINATOR_AND:
                         printf(" AND ");
                         break;
@@ -113,21 +121,21 @@ void print_tree(Node node){
                         printf(" OR ");
                         break;
                 }
-                print_tree(*node.right);
+                print_tree(*fork.right);
                 break;
             }
     }
 }
 
-NamedObject new_constant(char * name, Node * node){
-    NamedObject named_object = { OT_CONSTANT , name, node };
+NamedLeaf new_constant(char * name, Node * node){
+    NamedLeaf named_object = { LT_CONSTANT, name, node };
     return named_object;
 }
 
-void print_named_object(NamedObject object){
+void print_named_object(NamedLeaf object){
     switch(object.type){
-        case OT_CONSTANT:
-            printf("NAMED OBJECT: constant { name = %s, ref = %s }", object.name, NODE_TYPE_STR(object.ref->type));
+        case LT_CONSTANT:
+            printf("NAMED LEAF: constant { name = %s, ref = %s }", object.name, NODE_TYPE_STR(object.ref->type));
             break;
     }
 }

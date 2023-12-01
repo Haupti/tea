@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include "token.h"
 
-#define NODE_TYPE_STR(x) (x == LEAF ? "LEAF" : (x == FORK ? "FORK" : (x == SPROUT ? "SPROUT" : "")))
+#define NODE_TYPE_STR(x) (x == LEAF ? "LEAF" : (x == FORK ? "FORK" : (x == SPROUT ? "SPROUT" : (x == NAMED_LEAF ? "NAMED_LEAF" : ""))))
 
 typedef enum Value {
     VALUE_ON,
@@ -22,91 +22,75 @@ typedef enum Modifier {
     MODIFIER_NOT,
 } Modifier;
 
-typedef union NodeValue{
+struct Node;
+
+typedef struct Leaf {
     enum Value value;
-    enum Combinator combinator;
+} Leaf;
+
+typedef enum NamedLeafType {
+    LT_CONSTANT,
+} NamedLeafType;
+
+typedef struct NamedLeaf {
+    NamedLeafType type;
+    char * name;
+    struct NamedLeaf ** in_scope_named_leafs;
+    int in_scope_named_leafs_count;
+} NamedLeaf;
+
+typedef struct Sprout {
+    struct Node * tip;
     enum Modifier modifier;
-    char * identifier;
-} NodeValue;
+} Sprout;
+
+typedef struct Fork {
+    struct Node * left;
+    struct Node * right;
+    enum Combinator combinator;
+} Fork;
+
+typedef struct Conditional {
+    struct NamedLeaf ** in_scope_named_leafs;
+    int in_scope_named_leafs_count;
+    struct Node * condition;
+    struct Node * then;
+    struct Node * otherwise;
+} Conditional;
+
+union NodeI {
+    struct Leaf leaf;
+    struct NamedLeaf named_leaf;
+    struct Sprout sprout;
+    struct Fork fork;
+    struct Conditional condition;
+};
+
 
 typedef enum NodeType {
     LEAF,
-    OBJECT_LEAF,
+    NAMED_LEAF,
     FORK,
     SPROUT,
 } NodeType;
-/* TODO
- * make the different node types structs
- * typedef struct Leaf {
- *      enum Value value;
- * } Leaf;
- *
- * typedef struct ObjectLeaf {
- *      enum NamedObject ** in_scope_named_objects;
- *      int in_scope_named_objects_count;
- *      char * name;
- * } ObjectLeaf;
- *
- * typedef struct Sprout {
- *      struct Node * tip;
- *      enum Modifier modifier;
- * } Sprout;
- *
- * typedef struct Fork {
- *      struct Node * left;
- *      struct Node * right;
- *      enum Combinator combinator;
- * } Fork;
- *
- * typedef struct Conditional {
- *      enum NamedObject ** in_scope_named_objects;
- *      int in_scope_named_objects_count;
- *      struct Node * condition;
- *      struct Node * then;
- *      struct Node * else;
- * } Conditional;
- *
- * typedef struct Node {
- *      enum NodeType type;
- *      .... somethign here
- * }
- *
- */
-
-struct NamedObject;
 
 typedef struct Node {
-    NodeType type;
-    NodeValue value;
-    struct Node * left;
-    struct Node * right;
-    struct Node * tip;
-    struct NamedObject ** in_scope_named_objects;
-    int in_scope_named_objects_count;
+    enum NodeType type;
+    union NodeI it;
 } Node;
 
 
-typedef enum NamedObjectType {
-    OT_CONSTANT,
-} NamedObjectType;
-
-typedef struct NamedObject {
-    NamedObjectType type;
-    char * name;
-    Node * ref;
-} NamedObject;
-
-Node * create_leaf(Value value, NamedObject ** named_objects, int named_objects_count);
-Node * create_object_leaf(char * identifier_name, NamedObject ** in_scope_named_objects, int in_scope_named_objects_count);
+Node * create_leaf(Value value);
+Node * create_named_leaf(char * identifier_name, NamedLeaf ** in_scope_named_objects, int in_scope_named_objects_count);
 Node * create_sprout(Node * leaf, Modifier modifier);
 Node * create_fork(Node * left, Node * right, Combinator combinator);
-Node new_leaf(Value value, NamedObject ** in_scope_named_objects, int in_scope_named_objects_count);
-Node new_object_leaf(char * identifier_name, NamedObject ** in_scope_named_objects, int in_scope_named_objects_count);
+Node new_leaf(Value value);
+Node new_named_leaf(char * identifier_name, NamedLeaf ** in_scope_named_objects, int in_scope_named_objects_count);
 Node new_sprout(Node * tip, Modifier modifier);
 Node new_fork(Node * left, Node * right, Combinator combinator);
 
-NamedObject new_constant(char * name, Node * node);
-void print_named_object(NamedObject object);
+NamedLeaf new_constant(char * name, Node * node);
+void print_named_object(NamedLeaf object);
 
 void print_tree(Node node);
 
