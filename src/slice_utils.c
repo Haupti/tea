@@ -1,12 +1,15 @@
 #include "slice.h"
 #include "err.h"
+#include "token.h"
+
+#include <stdio.h>
 
 // starting on assignment
 Slice find_assignment_body(Slice slice){
     if(slice.arr[slice.start].type != SET){
         err("while cutting slice to size. im not at a statement start");
     }
-    // in the sence: "brackets a statement" i.e. set and ; are the brackets of an assignment
+    // in the sence: "brackets a statement" i.e. 'set' and 'in' are the brackets of an assignment
     int bracket_counter = 0;
 
     Token token;
@@ -26,10 +29,10 @@ Slice find_assignment_body(Slice slice){
     int statement_end_pos = i;
 
     if(bracket_counter != 0){
-        err("while searching for matching ';'. not found within slice");
+        err("while searching for matching 'in'. not found within slice");
     }
 
-    // set identifier = body ; -> i.e. start + 3 is start of body
+    // set identifier = body in -> i.e. start + 3 is start of body
     Slice assignment_slice = { slice.arr, slice.start+3, statement_end_pos-1};
     return assignment_slice;
 }

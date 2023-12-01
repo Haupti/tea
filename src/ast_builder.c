@@ -92,7 +92,7 @@ int combinator_position(Slice slice){
     return combinator_position;
 }
 
-int is_allowed_token_after_assignment_end(Token token){
+int is_allowed_token_after_assignments(Token token){
     return is_value(token) || token.type == NOT || token.type == IDENTIFIER || is_grp_open(token);
 }
 
@@ -155,12 +155,14 @@ Node * build_node(Slice slice, NodeReference ** parent_node_references, int pare
 
     Token temp_token;
     int i;
+
+
     for(i = slice.start; i <= slice.end; i++){
         temp_token = slice.arr[i];
         if(temp_token.type == SET){
             int identifier_pos = i+1;
             Slice body_slice = find_assignment_body(new_slice(slice.arr, i, slice.end));
-            Node * ref = build_node(body_slice, node_references, node_references_count);
+            Node * ref =  build_node(body_slice, node_references, node_references_count);
 
             NodeReference * temp_named_object = malloc(sizeof(NodeReference));
             NodeReference constant = new_node_ref(slice.arr[identifier_pos].name, ref);
@@ -175,22 +177,28 @@ Node * build_node(Slice slice, NodeReference ** parent_node_references, int pare
             node_references[node_references_count-1] = temp_named_object;
 
             i = body_slice.end + 1; // jump to statement end token
+            print_token(&slice.arr[i]);
         }
-        if(is_allowed_token_after_assignment_end(temp_token)){
+
+        if(is_allowed_token_after_assignments(temp_token)){
             after_assignments_end = i;
             break;
         }
     }
+
     if(after_assignments_end == -1){
+        print_token(&slice.arr[i]);
         err_at("while building tree: nothing to evaluate", i);
     }
 
-    int combinator_pos = combinator_position(slice);
+    Slice after_assigments_slice = {slice.arr, after_assignments_end, slice.end};
+    int combinator_pos = combinator_position(after_assigments_slice);
     if(combinator_pos == -1){
         Slice slice_without_assignments = new_slice(slice.arr, after_assignments_end,slice.end);
         return create_from_unforked_body(slice_without_assignments, node_references , node_references_count );
     }
     else {
+        printf("AE: %d CP %d\n", after_assignments_end, combinator_pos);
         Slice left_slice = {slice.arr, after_assignments_end, combinator_pos - 1};
         Slice right_slice = {slice.arr, combinator_pos + 1, slice.end};
         Node * left = build_node(left_slice, node_references, node_references_count);

@@ -30,12 +30,12 @@ int main(int args, char * argv[]){
     tokens = realloc(tokens, sizeof(Token) * tokens_len); // it propably didnt -> resize
 
     // syntax check
-    SyntaxVerification syntax_verification = verify_syntax(tokens, tokens_len);
-    print_syntx_err_and_exit(syntax_verification);
+    //SyntaxVerification syntax_verification = verify_syntax(tokens, tokens_len);
+    //print_syntx_err_and_exit(syntax_verification);
 
     // sanity check
-    SanityCheck snty_check = sanity_check(tokens, tokens_len);
-    print_snty_err_and_exit(snty_check);
+    //SanityCheck snty_check = sanity_check(tokens, tokens_len);
+    //print_snty_err_and_exit(snty_check);
 
     // build AST / binary tree
     Node tree = build_tree(tokens, 0, tokens_len-1);
