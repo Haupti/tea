@@ -14,8 +14,8 @@ Node * create_fork(Node * left, Node * right, Combinator combinator){
 }
 
 
-Node * create_object_leaf(char * identifier_name, NamedLeaf ** in_scope_named_leafs, int in_scope_named_leafs_count){
-    Node leaf = new_named_leaf(identifier_name, in_scope_named_leafs, in_scope_named_leafs_count);
+Node * create_object_leaf(char * identifier_name, NodeReference ** in_scope_node_refs, int in_scope_node_refs_count){
+    Node leaf = new_named_leaf(identifier_name, in_scope_node_refs, in_scope_node_refs_count);
     Node * leaf_ptr = malloc(sizeof(Node));
     if(leaf_ptr == NULL){
         err("cannot allocate space for node");
@@ -52,10 +52,10 @@ Node new_leaf(Value value){
     return node;
 }
 
-Node new_named_leaf(char * identifier_name, NamedLeaf ** in_scope_named_leafs, int in_scope_named_leafs_count){
-    NamedLeaf named_leaf = { LT_CONSTANT, identifier_name, in_scope_named_leafs, in_scope_named_leafs_count };
+Node new_identifier_leaf(char * identifier_name, NodeReference ** in_scope_node_refs, int ins_scope_node_refs_count){
+    IdentifierLeaf identifier_leaf = { identifier_name, in_scope_node_refs, ins_scope_node_refs_count };
     union NodeI node_i;
-    node_i.named_leaf = named_leaf;
+    node_i.id_leaf = identifier_leaf;
     Node node = { NAMED_LEAF, node_i};
     return node;
 }
@@ -92,8 +92,8 @@ void print_tree(Node node){
             }
         case NAMED_LEAF:
             {
-                NamedLeaf named_leaf = node.it.named_leaf;
-                printf("IDENTIFIER(%s)", named_leaf.name);
+                IdentifierLeaf id_leaf = node.it.id_leaf;
+                printf("IDENTIFIER(%s)", id_leaf.name);
                 break;
             }
         case SPROUT:
@@ -127,15 +127,15 @@ void print_tree(Node node){
     }
 }
 
-NamedLeaf new_constant(char * name, Node * node){
-    NamedLeaf named_object = { LT_CONSTANT, name, node };
+NodeReference new_node_ref(char * name, Node * node){
+    NodeReference named_object = { REF_TYPE_CONSTANT, name, node };
     return named_object;
 }
 
-void print_named_object(NamedLeaf object){
+void print_node_reference(NodeReference object){
     switch(object.type){
-        case LT_CONSTANT:
-            printf("NAMED LEAF: constant { name = %s, ref = %s }", object.name, NODE_TYPE_STR(object.ref->type));
+        case REF_TYPE_CONSTANT:
+            printf("REFERENCE: constant { name = %s, ref = %s }", object.name, NODE_TYPE_STR(object.ref->type));
             break;
     }
 }

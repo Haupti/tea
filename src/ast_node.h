@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include "token.h"
 
-#define NODE_TYPE_STR(x) (x == LEAF ? "LEAF" : (x == FORK ? "FORK" : (x == SPROUT ? "SPROUT" : (x == NAMED_LEAF ? "NAMED_LEAF" : ""))))
+#define NODE_TYPE_STR(x) (x == LEAF ? "LEAF" : (x == FORK ? "FORK" : (x == SPROUT ? "SPROUT" : (x == IDENTIFIER_LEAF ? "IDENTIFIER_LEAF" : ""))))
 
 typedef enum Value {
     VALUE_ON,
@@ -22,22 +22,30 @@ typedef enum Modifier {
     MODIFIER_NOT,
 } Modifier;
 
+
 struct Node;
+
+
+typedef enum NodeReferenceType {
+    REF_TYPE_CONSTANT,
+} NodeReferenceType;
+
+// this is not a node
+typedef struct NodeReference {
+    NodeReferenceType type;
+    char * name;
+    struct Node * ref;
+} NodeReference;
 
 typedef struct Leaf {
     enum Value value;
 } Leaf;
 
-typedef enum NamedLeafType {
-    LT_CONSTANT,
-} NamedLeafType;
-
-typedef struct NamedLeaf {
-    NamedLeafType type;
+typedef struct IdentifierLeaf {
     char * name;
-    struct NamedLeaf ** in_scope_named_leafs;
-    int in_scope_named_leafs_count;
-} NamedLeaf;
+    struct NodeReference ** in_scope_node_refs;
+    int in_scope_node_refs_count;
+} IdentifierLeaf;
 
 typedef struct Sprout {
     struct Node * tip;
@@ -51,8 +59,8 @@ typedef struct Fork {
 } Fork;
 
 typedef struct Conditional {
-    struct NamedLeaf ** in_scope_named_leafs;
-    int in_scope_named_leafs_count;
+    struct NodeReference ** in_scope_node_refs;
+    int in_scope_node_refs_count;
     struct Node * condition;
     struct Node * then;
     struct Node * otherwise;
@@ -60,7 +68,7 @@ typedef struct Conditional {
 
 union NodeI {
     struct Leaf leaf;
-    struct NamedLeaf named_leaf;
+    struct IdentifierLeaf id_leaf;
     struct Sprout sprout;
     struct Fork fork;
     struct Conditional condition;
@@ -69,7 +77,7 @@ union NodeI {
 
 typedef enum NodeType {
     LEAF,
-    NAMED_LEAF,
+    IDENTIFIER_LEAF,
     FORK,
     SPROUT,
 } NodeType;
@@ -81,16 +89,16 @@ typedef struct Node {
 
 
 Node * create_leaf(Value value);
-Node * create_named_leaf(char * identifier_name, NamedLeaf ** in_scope_named_objects, int in_scope_named_objects_count);
+Node * create_named_leaf(char * identifier_name, NodeReference ** in_scope_node_refs, int in_scope_refs_count);
 Node * create_sprout(Node * leaf, Modifier modifier);
 Node * create_fork(Node * left, Node * right, Combinator combinator);
 Node new_leaf(Value value);
-Node new_named_leaf(char * identifier_name, NamedLeaf ** in_scope_named_objects, int in_scope_named_objects_count);
+Node new_named_leaf(char * identifier_name, NodeReference ** in_scope_node_refs, int in_scope_node_refs_count);
 Node new_sprout(Node * tip, Modifier modifier);
 Node new_fork(Node * left, Node * right, Combinator combinator);
 
-NamedLeaf new_constant(char * name, Node * node);
-void print_named_object(NamedLeaf object);
+NodeReference new_node_ref(char * name, Node * node);
+void print_identifier_leaf(IdentifierLeaf object);
 
 void print_tree(Node node);
 
