@@ -185,7 +185,6 @@ int read_tokens(Token * tokens, char * input, size_t input_len){
                         err_at("unexpected character", i);
                     }
                 }
-
         }
     }
     return token_index;

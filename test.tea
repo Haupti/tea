@@ -6,5 +6,9 @@
 --    a & b
 --end
 
-set a = (1 | 0) in
-1
+
+set a = 1 | 0 in
+set b = (a & 1) in
+set c = b in
+(b | a) & c
+

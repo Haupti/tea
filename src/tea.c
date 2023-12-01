@@ -24,9 +24,6 @@ Value tea(char * program, int program_size){
 
     // build AST / binary tree
     Node tree = build_tree(tokens, 0, tokens_len-1);
-    printf("DEBUG: tree:\n");
-    print_tree(tree);
-    printf("\n");
 
     // evaluate program and return
     return evaluate_node(&tree);
