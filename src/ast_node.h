@@ -89,11 +89,11 @@ typedef struct Node {
 
 
 Node * create_leaf(Value value);
-Node * create_named_leaf(char * identifier_name, NodeReference ** in_scope_node_refs, int in_scope_refs_count);
+Node * create_identifier_leaf(char * identifier_name, NodeReference ** in_scope_node_refs, int in_scope_refs_count);
 Node * create_sprout(Node * leaf, Modifier modifier);
 Node * create_fork(Node * left, Node * right, Combinator combinator);
 Node new_leaf(Value value);
-Node new_named_leaf(char * identifier_name, NodeReference ** in_scope_node_refs, int in_scope_node_refs_count);
+Node new_identifier_leaf(char * identifier_name, NodeReference ** in_scope_node_refs, int in_scope_node_refs_count);
 Node new_sprout(Node * tip, Modifier modifier);
 Node new_fork(Node * left, Node * right, Combinator combinator);
 

@@ -15,7 +15,7 @@
 #include "ast_builder_internal.h"
 
 Node new_top_level_leaf(Value value){
-    return new_leaf(value, NULL, 0);
+    return new_leaf(value);
 }
 
 MODULAR_DESCRIBE(evaluate_node_tests, {

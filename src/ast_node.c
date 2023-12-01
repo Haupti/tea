@@ -3,6 +3,11 @@
 #include <string.h>
 #include "err.h"
 
+NodeReference new_node_ref(char * name, Node * node){
+    NodeReference named_object = { REF_TYPE_CONSTANT, name, node };
+    return named_object;
+}
+
 Node * create_fork(Node * left, Node * right, Combinator combinator){
     Node fork = new_fork(left, right, combinator);
     Node * fork_ptr = malloc(sizeof(Node));
@@ -13,9 +18,8 @@ Node * create_fork(Node * left, Node * right, Combinator combinator){
     return fork_ptr;
 }
 
-
-Node * create_object_leaf(char * identifier_name, NodeReference ** in_scope_node_refs, int in_scope_node_refs_count){
-    Node leaf = new_named_leaf(identifier_name, in_scope_node_refs, in_scope_node_refs_count);
+Node * create_identifier_leaf(char * identifier_name, NodeReference ** in_scope_node_refs, int in_scope_node_refs_count){
+    Node leaf = new_identifier_leaf(identifier_name, in_scope_node_refs, in_scope_node_refs_count);
     Node * leaf_ptr = malloc(sizeof(Node));
     if(leaf_ptr == NULL){
         err("cannot allocate space for node");
@@ -56,7 +60,7 @@ Node new_identifier_leaf(char * identifier_name, NodeReference ** in_scope_node_
     IdentifierLeaf identifier_leaf = { identifier_name, in_scope_node_refs, ins_scope_node_refs_count };
     union NodeI node_i;
     node_i.id_leaf = identifier_leaf;
-    Node node = { NAMED_LEAF, node_i};
+    Node node = { IDENTIFIER_LEAF, node_i};
     return node;
 }
 
@@ -90,7 +94,7 @@ void print_tree(Node node){
                 }
                 break;
             }
-        case NAMED_LEAF:
+        case IDENTIFIER_LEAF:
             {
                 IdentifierLeaf id_leaf = node.it.id_leaf;
                 printf("IDENTIFIER(%s)", id_leaf.name);
@@ -125,11 +129,6 @@ void print_tree(Node node){
                 break;
             }
     }
-}
-
-NodeReference new_node_ref(char * name, Node * node){
-    NodeReference named_object = { REF_TYPE_CONSTANT, name, node };
-    return named_object;
 }
 
 void print_node_reference(NodeReference object){

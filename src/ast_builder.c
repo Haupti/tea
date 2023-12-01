@@ -96,10 +96,10 @@ int is_allowed_token_after_assignment_end(Token token){
     return is_value(token) || token.type == NOT || token.type == IDENTIFIER || is_grp_open(token);
 }
 
-Node * build_node(Slice slice, NamedObject ** parent_named_objects, int parent_named_objects_count);
+Node * build_node(Slice slice, NodeReference ** parent_node_references, int parent_node_references_count);
 
 // expects slice to only contain tokens of the node to create i.e. the assignments must be collected before calling this
-Node * create_from_unforked_body(Slice slice, NamedObject ** in_scope_named_objects, int in_scope_named_objects_count){
+Node * create_from_unforked_body(Slice slice, NodeReference ** in_scope_node_references, int in_scope_node_references_count){
         Token current_token;
         int nots = 0;
         int current_token_pos;
@@ -109,7 +109,7 @@ Node * create_from_unforked_body(Slice slice, NamedObject ** in_scope_named_obje
                 nots = (nots + 1) % 2;
             }
             else if(is_value(current_token)) {
-                Node * leaf = create_leaf(to_value(current_token), in_scope_named_objects, in_scope_named_objects_count);
+                Node * leaf = create_leaf(to_value(current_token));
                 if(nots != 0){
                     return create_sprout(leaf, MODIFIER_NOT);
                 }
@@ -119,7 +119,7 @@ Node * create_from_unforked_body(Slice slice, NamedObject ** in_scope_named_obje
                 break;
             }
             else if(is_identifier(current_token)){
-                Node * leaf = create_object_leaf(current_token.name, in_scope_named_objects, in_scope_named_objects_count);
+                Node * leaf = create_identifier_leaf(current_token.name, in_scope_node_references, in_scope_node_references_count);
                 if(nots != 0){
                     return create_sprout(leaf, MODIFIER_NOT);
                 }
@@ -130,7 +130,7 @@ Node * create_from_unforked_body(Slice slice, NamedObject ** in_scope_named_obje
             }
             else if(is_grp_open(current_token)){
                 Slice grp_body_slice = cut_group_slice_to_size(new_slice(slice.arr, current_token_pos, slice.end));
-                Node * node = build_node(grp_body_slice, in_scope_named_objects, in_scope_named_objects_count);
+                Node * node = build_node(grp_body_slice, in_scope_node_references, in_scope_node_references_count);
                 if(nots != 0){
                     return create_sprout(node, MODIFIER_NOT);
                 }
@@ -145,11 +145,11 @@ Node * create_from_unforked_body(Slice slice, NamedObject ** in_scope_named_obje
 }
 
 // TODO refactor
-Node * build_node(Slice slice, NamedObject ** parent_named_objects, int parent_named_objects_count){
+Node * build_node(Slice slice, NodeReference ** parent_node_references, int parent_node_references_count){
 
-    NamedObject ** named_objects = malloc(sizeof(NamedObject*) * parent_named_objects_count);
-    memcpy(named_objects, parent_named_objects, sizeof(NamedObject*) * parent_named_objects_count);
-    int named_objects_count = parent_named_objects_count;
+    NodeReference ** node_references = malloc(sizeof(NodeReference*) * parent_node_references_count);
+    memcpy(node_references, parent_node_references, sizeof(NodeReference*) * parent_node_references_count);
+    int node_references_count = parent_node_references_count;
 
     int after_assignments_end = -1;
 
@@ -160,19 +160,19 @@ Node * build_node(Slice slice, NamedObject ** parent_named_objects, int parent_n
         if(temp_token.type == SET){
             int identifier_pos = i+1;
             Slice body_slice = find_assignment_body(new_slice(slice.arr, i, slice.end));
-            Node * ref = build_node(body_slice, named_objects, named_objects_count);
+            Node * ref = build_node(body_slice, node_references, node_references_count);
 
-            NamedObject * temp_named_object = malloc(sizeof(NamedObject));
-            NamedObject constant = new_constant(slice.arr[identifier_pos].name, ref);
-            memcpy(temp_named_object, &constant , sizeof(NamedObject));
+            NodeReference * temp_named_object = malloc(sizeof(NodeReference));
+            NodeReference constant = new_node_ref(slice.arr[identifier_pos].name, ref);
+            memcpy(temp_named_object, &constant , sizeof(NodeReference));
 
-            named_objects_count += 1;
-            NamedObject ** temp_named_objects = realloc(named_objects, sizeof(NamedObject*) * (named_objects_count));
-            if(temp_named_objects == NULL){
+            node_references_count += 1;
+            NodeReference ** temp_node_references = realloc(node_references, sizeof(NodeReference*) * (node_references_count));
+            if(temp_node_references == NULL){
                 err("failed to allocate space");
             }
-            named_objects = temp_named_objects;
-            named_objects[named_objects_count-1] = temp_named_object;
+            node_references = temp_node_references;
+            node_references[node_references_count-1] = temp_named_object;
 
             i = body_slice.end + 1; // jump to statement end token
         }
@@ -188,13 +188,13 @@ Node * build_node(Slice slice, NamedObject ** parent_named_objects, int parent_n
     int combinator_pos = combinator_position(slice);
     if(combinator_pos == -1){
         Slice slice_without_assignments = new_slice(slice.arr, after_assignments_end,slice.end);
-        return create_from_unforked_body(slice_without_assignments, named_objects , named_objects_count );
+        return create_from_unforked_body(slice_without_assignments, node_references , node_references_count );
     }
     else {
         Slice left_slice = {slice.arr, after_assignments_end, combinator_pos - 1};
         Slice right_slice = {slice.arr, combinator_pos + 1, slice.end};
-        Node * left = build_node(left_slice, named_objects, named_objects_count);
-        Node * right = build_node(right_slice, named_objects, named_objects_count);
+        Node * left = build_node(left_slice, node_references, node_references_count);
+        Node * right = build_node(right_slice, node_references, node_references_count);
         Node * fork = create_fork(left, right, to_combinator(slice.arr[combinator_pos]));
         return fork;
     }
@@ -206,8 +206,8 @@ Node * build_node(Slice slice, NamedObject ** parent_named_objects, int parent_n
 Node build_tree(Token * tokens, size_t start_token, size_t end_token){
     Slice slice = new_slice(tokens, start_token, end_token);
 
-    NamedObject ** initial_named_objects = NULL;
-    int initial_named_objects_count = 0;
+    NodeReference ** initial_node_references = NULL;
+    int initial_node_references_count = 0;
 
-    return *build_node(slice, initial_named_objects, initial_named_objects_count);
+    return *build_node(slice, initial_node_references, initial_node_references_count);
 }
