@@ -144,7 +144,7 @@ Node * create_from_unforked_body(Slice slice, NodeReference ** in_scope_node_ref
         return NULL;
 }
 
-// TODO refactor
+
 Node * build_node(Slice slice, NodeReference ** parent_node_references, int parent_node_references_count){
 
     NodeReference ** node_references = malloc(sizeof(NodeReference*) * parent_node_references_count);
@@ -155,18 +155,18 @@ Node * build_node(Slice slice, NodeReference ** parent_node_references, int pare
 
     Token temp_token;
     int i;
-
-
     for(i = slice.start; i <= slice.end; i++){
         temp_token = slice.arr[i];
         if(temp_token.type == SET){
             int identifier_pos = i+1;
-            Slice body_slice = find_assignment_body(new_slice(slice.arr, i, slice.end));
+            Slice slice_starting_at_set = {slice.arr, identifier_pos-1, slice.end};
+
+
+            Token identifier = slice_starting_at_set.arr[slice_starting_at_set.start+1];
+            Slice body_slice = find_assignment_body(slice_starting_at_set);
             Node * ref =  build_node(body_slice, node_references, node_references_count);
 
-            NodeReference * temp_named_object = malloc(sizeof(NodeReference));
-            NodeReference constant = new_node_ref(slice.arr[identifier_pos].name, ref);
-            memcpy(temp_named_object, &constant , sizeof(NodeReference));
+            NodeReference * node_ref = create_node_ref(identifier.name, ref) ;
 
             node_references_count += 1;
             NodeReference ** temp_node_references = realloc(node_references, sizeof(NodeReference*) * (node_references_count));
@@ -174,9 +174,9 @@ Node * build_node(Slice slice, NodeReference ** parent_node_references, int pare
                 err("failed to allocate space");
             }
             node_references = temp_node_references;
-            node_references[node_references_count-1] = temp_named_object;
-
-            i = body_slice.end + 1; // jump to statement end token
+            node_references[(node_references_count)-1] = node_ref;
+            int assignment_end_pos =  body_slice.end + 1;
+            i = assignment_end_pos;
         }
 
         if(is_allowed_token_after_assignments(temp_token)){

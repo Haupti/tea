@@ -40,4 +40,9 @@ MODULAR_DESCRIBE(build_tree_tests,{
         ASSERT_EQUALS(node.it.fork.right->type, LEAF);
         ASSERT_EQUALS(node.it.fork.right->it.leaf.value, VALUE_OFF);
     })
+    TEST("builds conditional node", {
+        Token tokens[] = ARRAY(new_token(IF), new_token(ON), new_token(THEN), new_token(ON), new_token(ELSE), new_token(OFF), new_token(END));
+        Node node =  build_tree(tokens, 0, LEN(tokens));
+        ASSERT_EQUALS(node.type, CONDITIONAL);
+    })
 })

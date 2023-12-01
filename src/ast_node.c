@@ -3,6 +3,16 @@
 #include <string.h>
 #include "err.h"
 
+NodeReference * create_node_ref(char * name, Node * ref){
+    NodeReference node_ref = new_node_ref(name, ref);
+    NodeReference * node_ref_ptr = malloc(sizeof(NodeReference));
+    if(node_ref_ptr == NULL){
+        err("cannot allocate space for node");
+    }
+    memcpy(node_ref_ptr, &node_ref , sizeof(NodeReference));
+    return node_ref_ptr;
+}
+
 NodeReference new_node_ref(char * name, Node * node){
     NodeReference named_object = { REF_TYPE_CONSTANT, name, node };
     return named_object;
@@ -126,6 +136,18 @@ void print_tree(Node node){
                         break;
                 }
                 print_tree(*fork.right);
+                break;
+            }
+        case CONDITIONAL:
+            {
+                Conditional cond = node.it.conditional;
+                printf("IF ");
+                print_tree(*cond.condition);
+                printf("THEN ");
+                print_tree(*cond.then);
+                printf("ELSE ");
+                print_tree(*cond.otherwise);
+                printf(" END");
                 break;
             }
     }

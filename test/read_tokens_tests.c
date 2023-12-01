@@ -69,4 +69,17 @@ MODULAR_DESCRIBE(read_tokens_tests,{
             ASSERT_STR_EQUALS(show ,expected[i]);
         }
     })
+    TEST("reads conditional",{
+        Token tokens[20];
+        char input[] = "set a = 1 in if a then 0 else 1 end";
+        printf("STRLEN %lld\n", strlen(input));
+        int count = read_tokens(tokens, input , strlen(input)+1);
+        char show[25];
+        char expected[12][25] = ARRAY("SET", "IDENTIFIER(a)", "ASSIGNMENT_OPERATOR", "ON", "STATEMENT_END", "IF", "IDENTIFIER(a)", "THEN", "OFF", "ELSE", "ON", "END");
+        ASSERT_INT_EQUALS(count, 12);
+        for(int i = 0; i < count; i++){
+            show_token(show, &tokens[i]) ;
+            ASSERT_STR_EQUALS(show ,expected[i]);
+        }
+    })
 })

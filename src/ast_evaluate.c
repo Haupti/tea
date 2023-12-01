@@ -1,6 +1,7 @@
 #include "ast_node.h"
 #include "ast_evaluate.h"
 #include "err.h"
+#include "token.h"
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
@@ -114,6 +115,9 @@ Value evaluate_node(Node * node){
             break;
         case FORK:
             return evaluate_fork(node->it.fork);
+            break;
+        default:
+            err("malformed tree");
             break;
     }
     err("malformed tree");

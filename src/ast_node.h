@@ -58,8 +58,6 @@ typedef struct Fork {
 } Fork;
 
 typedef struct Conditional {
-    struct NodeReference ** in_scope_node_refs;
-    int in_scope_node_refs_count;
     struct Node * condition;
     struct Node * then;
     struct Node * otherwise;
@@ -70,15 +68,15 @@ union NodeI {
     struct IdentifierLeaf id_leaf;
     struct Sprout sprout;
     struct Fork fork;
-    struct Conditional condition;
+    struct Conditional conditional;
 };
-
 
 typedef enum NodeType {
     LEAF,
     IDENTIFIER_LEAF,
     FORK,
     SPROUT,
+    CONDITIONAL,
 } NodeType;
 
 typedef struct Node {
@@ -96,6 +94,7 @@ Node new_identifier_leaf(char * identifier_name, NodeReference ** in_scope_node_
 Node new_sprout(Node * tip, Modifier modifier);
 Node new_fork(Node * left, Node * right, Combinator combinator);
 
+NodeReference * create_node_ref(char * name, Node * ref);
 NodeReference new_node_ref(char * name, Node * node);
 void print_identifier_leaf(IdentifierLeaf object);
 
