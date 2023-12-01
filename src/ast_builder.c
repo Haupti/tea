@@ -177,7 +177,6 @@ Node * build_node(Slice slice, NodeReference ** parent_node_references, int pare
             node_references[node_references_count-1] = temp_named_object;
 
             i = body_slice.end + 1; // jump to statement end token
-            print_token(&slice.arr[i]);
         }
 
         if(is_allowed_token_after_assignments(temp_token)){
@@ -187,7 +186,6 @@ Node * build_node(Slice slice, NodeReference ** parent_node_references, int pare
     }
 
     if(after_assignments_end == -1){
-        print_token(&slice.arr[i]);
         err_at("while building tree: nothing to evaluate", i);
     }
 
@@ -198,7 +196,6 @@ Node * build_node(Slice slice, NodeReference ** parent_node_references, int pare
         return create_from_unforked_body(slice_without_assignments, node_references , node_references_count );
     }
     else {
-        printf("AE: %d CP %d\n", after_assignments_end, combinator_pos);
         Slice left_slice = {slice.arr, after_assignments_end, combinator_pos - 1};
         Slice right_slice = {slice.arr, combinator_pos + 1, slice.end};
         Node * left = build_node(left_slice, node_references, node_references_count);

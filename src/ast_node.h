@@ -1,7 +1,6 @@
 #ifndef AST_NODE_HEADER
 #define AST_NODE_HEADER
 
-#include <stdlib.h>
 #include "token.h"
 
 #define NODE_TYPE_STR(x) (x == LEAF ? "LEAF" : (x == FORK ? "FORK" : (x == SPROUT ? "SPROUT" : (x == IDENTIFIER_LEAF ? "IDENTIFIER_LEAF" : ""))))

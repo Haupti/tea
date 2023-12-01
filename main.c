@@ -11,6 +11,7 @@
 #include "src/syntax_verify.h"
 #include "src/token.h"
 #include "src/err.h"
+#include "src/tea.h"
 
 int main(int args, char * argv[]){
 
@@ -24,27 +25,8 @@ int main(int args, char * argv[]){
     long filesize = file_content.size;
     char * program = file_content.buffer;
 
-    // lexing
-    Token * tokens = malloc(sizeof(Token) * filesize); // if every char would result in a token
-    int tokens_len = read_tokens(tokens, program, strlen(program));
-    tokens = realloc(tokens, sizeof(Token) * tokens_len); // it propably didnt -> resize
 
-    // syntax check
-    //SyntaxVerification syntax_verification = verify_syntax(tokens, tokens_len);
-    //print_syntx_err_and_exit(syntax_verification);
-
-    // sanity check
-    //SanityCheck snty_check = sanity_check(tokens, tokens_len);
-    //print_snty_err_and_exit(snty_check);
-
-    // build AST / binary tree
-    Node tree = build_tree(tokens, 0, tokens_len-1);
-    printf("DEBUG: tree:\n");
-    print_tree(tree);
-    printf("\n");
-
-    // evaluate program
-    Value val = evaluate_node(&tree);
+    Value val = tea(program, filesize);
     switch(val){
         case VALUE_ON:
             puts("1");
@@ -53,7 +35,6 @@ int main(int args, char * argv[]){
             puts("0");
             break;
     }
-
     return EXIT_SUCCESS;
 }
 

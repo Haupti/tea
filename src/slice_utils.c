@@ -2,8 +2,6 @@
 #include "err.h"
 #include "token.h"
 
-#include <stdio.h>
-
 // starting on assignment
 Slice find_assignment_body(Slice slice){
     if(slice.arr[slice.start].type != SET){

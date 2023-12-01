@@ -6,6 +6,7 @@
 #include "read_tokens_tests.h"
 #include "internal_functions_tests.h"
 #include "sanity_check_tests.h"
+#include "acceptance_tests.h"
 
 int main(){
     RUN_DESCRIBE_MODULE(evaluate_node_tests)
@@ -14,5 +15,6 @@ int main(){
     RUN_DESCRIBE_MODULE(read_tokens_tests)
     RUN_DESCRIBE_MODULE(internal_functions_tests)
     RUN_DESCRIBE_MODULE(sanity_check_tests)
+    RUN_DESCRIBE_MODULE(acceptance_tests)
     return EXIT_SUCCESS;
 }
