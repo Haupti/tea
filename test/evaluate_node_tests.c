@@ -56,6 +56,17 @@ MODULAR_DESCRIBE(evaluate_node_tests, {
         Value value = evaluate_node(&node);
         ASSERT_EQUALS(value, VALUE_ON);
     })
+    TEST("evaluates conditional",{
+        Node condition = new_top_level_leaf(VALUE_ON);
+
+        Node then = new_top_level_leaf(VALUE_OFF);
+        Node otherwise = new_top_level_leaf(VALUE_ON);
+
+        Node conditional = new_conditional(&condition, &then, &otherwise);
+
+        Value value = evaluate_node(&conditional);
+        ASSERT_EQUALS(value, VALUE_OFF);
+    })
 })
 
 

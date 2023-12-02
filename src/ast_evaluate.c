@@ -50,6 +50,16 @@ Value evaluate_fork(Fork fork){
     err("value evaluation impossible (fork)");
 }
 
+Value evaluate_conditional_node(Conditional conditional){
+    Value cond = evaluate_node(conditional.condition);
+    if(cond == VALUE_ON){
+        return evaluate_node(conditional.then);
+    }
+    else {
+        return evaluate_node(conditional.otherwise);
+    }
+}
+
 Value evaluate_leaf(Leaf leaf){
    return leaf.value;
 }
@@ -115,6 +125,9 @@ Value evaluate_node(Node * node){
             break;
         case FORK:
             return evaluate_fork(node->it.fork);
+            break;
+        case CONDITIONAL:
+            return evaluate_conditional_node(node->it.conditional);
             break;
         default:
             err("malformed tree");
