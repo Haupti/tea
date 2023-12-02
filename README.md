@@ -31,6 +31,7 @@ and `1 | 1 & 0` raises an exception because its not properly grouped.\
 * **0.0.4** implement comments and constants. this works now: `set a = 0; (a | set b = 1 b) -- this is a comment` and evaluates to 1
 * **0.0.5** reimplement the algorith again: it actually works correctly now and is easier to understand
 * **0.0.6** add sanity checker so more problems are 'pre-execution time errors' (see long description)
+* **0.0.7** add support conditional statement `if 0 then 1 else 0 end`
 
 ## version feature list (long)
 ### 0.0.6
