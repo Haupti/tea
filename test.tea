@@ -1,14 +1,8 @@
---(set mutable a = 0;
---    (a | mutate a = 1; a)
---)
+define fnname a b as
+    if a then (a | b) else b end
+done
 
---function name a b:
---    a & b
---end
+set y = 1 in
+set x = 0 in
 
-
-set a = 1 | 0 in
-set b = (a & 1) in
-set c = b in
-(if a then b else c end | 0)
-
+(x | y)

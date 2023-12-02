@@ -47,6 +47,12 @@ void print_error_type(SyntaxErrorType type){
         case SYNTX_ERR_NO_STATEMENT_TO_END:
             printf("SYNTX_ERR_NO_STATEMENT_TO_END\n");
             break;
+        case SYNTX_ERR_INCOMPLETE_CONDITIONAL:
+            printf("SYNTX_ERR_INCOMPLETE_CONDITIONAL\n");
+            break;
+        case SYNTX_ERR_NO_CONDITIONAL_TO_END:
+            printf("SYNTX_ERR_NO_CONDITIONAL_TO_END\n");
+            break;
     }
 }
 

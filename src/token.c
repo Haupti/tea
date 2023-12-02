@@ -110,5 +110,14 @@ void show_token(char * destination, Token * token){
         case END:
             strcpy(destination, "END");
             break;
+        case DEFINE_AS:
+            strcpy(destination, "DEFINE_AS");
+            break;
+        case DEFINE:
+            strcpy(destination, "DEFINE");
+            break;
+        case DONE:
+            strcpy(destination, "DONE");
+            break;
     }
 }

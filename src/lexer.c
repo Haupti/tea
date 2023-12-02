@@ -85,6 +85,18 @@ int read_tokens(Token * tokens, char * input, size_t input_len){
                     tokens[token_index] = new_token(END);
                     token_index += 1;
                 }
+                else if(strcmp(word, "define") == 0){
+                    tokens[token_index] = new_token(DEFINE);
+                    token_index += 1;
+                }
+                else if(strcmp(word, "as") == 0){
+                    tokens[token_index] = new_token(DEFINE_AS);
+                    token_index += 1;
+                }
+                else if(strcmp(word, "done") == 0){
+                    tokens[token_index] = new_token(DONE);
+                    token_index += 1;
+                }
                 else{
                     char * name = malloc(sizeof(char) * (word_index));
                     strcpy(name, word);

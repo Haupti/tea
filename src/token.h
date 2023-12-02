@@ -20,7 +20,10 @@ typedef enum TokenType {
     IF,
     THEN,
     ELSE,
-    END
+    END,
+    DEFINE,
+    DEFINE_AS,
+    DONE
 } TokenType;
 
 typedef struct Token {

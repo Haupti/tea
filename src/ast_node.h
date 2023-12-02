@@ -36,6 +36,13 @@ typedef struct NodeReference {
     struct Node * ref;
 } NodeReference;
 
+typedef struct Function {
+    char ** arg_names;
+    int args_count;
+    char * function_identifier;
+    struct Node * body;
+} Function;
+
 typedef struct Leaf {
     enum Value value;
 } Leaf;
@@ -45,6 +52,20 @@ typedef struct IdentifierLeaf {
     struct NodeReference ** in_scope_node_refs;
     int in_scope_node_refs_count;
 } IdentifierLeaf;
+
+// has nothing in scope, because the scope is only defined on function call
+typedef struct FunctionParamLeaf {
+    char * name;
+} FunctionParamLeaf;
+
+// has scope to determine and evaluate the parameters and insert these into the function
+typedef struct FunctionCallNode {
+    char * function_identifier;
+    struct Node ** params;
+    int params_count;
+    struct Function ** functions;
+    int functions_count;
+} FunctionCallNode;
 
 typedef struct Sprout {
     struct Node * tip;
@@ -69,6 +90,7 @@ union NodeI {
     struct Sprout sprout;
     struct Fork fork;
     struct Conditional conditional;
+    struct FunctionCallNode function_call;
 };
 
 typedef enum NodeType {
@@ -77,6 +99,7 @@ typedef enum NodeType {
     FORK,
     SPROUT,
     CONDITIONAL,
+    FUNCTION_CALL_NODE,
 } NodeType;
 
 typedef struct Node {
