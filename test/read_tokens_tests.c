@@ -95,4 +95,16 @@ MODULAR_DESCRIBE(read_tokens_tests,{
             ASSERT_STR_EQUALS(show ,expected[i]);
         }
     })
+    TEST("reads function definition",{
+        Token tokens[35];
+        char input[] = "define funcname a b as a | b done\n";
+        int count = read_tokens(tokens, input , strlen(input)+1);
+        char show[25];
+        char expected[9][25] = ARRAY("DEFINE", "IDENTIFIER(funcname)", "IDENTIFIER(a)", "IDENTIFIER(b)", "DEFINE_AS", "IDENTIFIER(a)", "OR", "IDENTIFIER(b)", "DONE");
+        ASSERT_INT_EQUALS(count, 9);
+        for(int i = 0; i < count; i++){
+            show_token(show, &tokens[i]) ;
+            ASSERT_STR_EQUALS(show ,expected[i]);
+        }
+    })
 })

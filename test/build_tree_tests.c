@@ -4,6 +4,7 @@
 #include "../src/ast_builder.h"
 #include "assert.h"
 #include "assert_helpers.h"
+#include <string.h>
 
 MODULAR_DESCRIBE(build_tree_tests,{
     TEST("builds leaf", {
@@ -56,5 +57,29 @@ MODULAR_DESCRIBE(build_tree_tests,{
         ASSERT_EQUALS(node.it.conditional.condition->type, IDENTIFIER_LEAF);
         ASSERT_EQUALS(node.it.conditional.then->type, LEAF);
         ASSERT_EQUALS(node.it.conditional.otherwise->type, LEAF);
+    })
+    TEST("builds function definition and call", {
+        Token tokens[] = ARRAY(new_token(DEFINE), new_identifier_token("funcname"), new_identifier_token("a"), new_identifier_token("b"), new_token(DEFINE_AS),
+            new_identifier_token("a"), new_token(OR), new_identifier_token("b"), new_token(DONE), new_identifier_token("funcname"), new_token(ON), new_token(OFF));
+        Node node =  build_tree(tokens, 0, LEN(tokens));
+        // node itself
+        ASSERT_EQUALS(node.type, FUNCTION_CALL_NODE);
+        ASSERT_STR_EQUALS(node.it.function_call.function_identifier, "funcname");
+        ASSERT_INT_EQUALS(node.it.function_call.params_count, 2);
+        ASSERT_EQUALS(node.it.function_call.params[0]->type, LEAF);
+        ASSERT_EQUALS(node.it.function_call.params[1]->type, LEAF);
+
+        // function
+        ASSERT_INT_EQUALS(node.it.function_call.functions_count, 1);
+        Function function = *node.it.function_call.functions[0];
+        ASSERT_STR_EQUALS(function.function_identifier, "funcname");
+        ASSERT_INT_EQUALS(function.args_count, 2);
+        ASSERT_STR_EQUALS(function.arg_names[0], "a");
+        ASSERT_STR_EQUALS(function.arg_names[0], "b");
+        ASSERT_EQUALS(function.body->type, FORK);
+        ASSERT_EQUALS(function.body->it.fork.left->type, FUNCTION_PARAM_LEAF);
+        ASSERT_STR_EQUALS(function.body->it.fork.left->it.fn_param_leaf.name, "a");
+        ASSERT_EQUALS(function.body->it.fork.right->type, FUNCTION_PARAM_LEAF);
+        ASSERT_STR_EQUALS(function.body->it.fork.right->it.fn_param_leaf.name, "b");
     })
 })

@@ -87,6 +87,7 @@ typedef struct Conditional {
 union NodeI {
     struct Leaf leaf;
     struct IdentifierLeaf id_leaf;
+    struct FunctionParamLeaf fn_param_leaf;
     struct Sprout sprout;
     struct Fork fork;
     struct Conditional conditional;
@@ -100,6 +101,7 @@ typedef enum NodeType {
     SPROUT,
     CONDITIONAL,
     FUNCTION_CALL_NODE,
+    FUNCTION_PARAM_LEAF,
 } NodeType;
 
 typedef struct Node {

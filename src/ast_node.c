@@ -168,6 +168,17 @@ void print_tree(Node node){
                 printf(" END");
                 break;
             }
+        case FUNCTION_CALL_NODE:
+            {
+                FunctionCallNode call = node.it.function_call;
+                printf("FUNCTION CALL %s", call.function_identifier);
+                break;
+            }
+        case FUNCTION_PARAM_LEAF:
+            {
+                printf("IDENTIFIER (fnparam) (%s)", node.it.fn_param_leaf.name);
+                break;
+            }
     }
 }
 
