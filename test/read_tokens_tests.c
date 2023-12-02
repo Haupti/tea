@@ -80,4 +80,19 @@ MODULAR_DESCRIBE(read_tokens_tests,{
             ASSERT_STR_EQUALS(show ,expected[i]);
         }
     })
+    TEST("reads conditional in complex setup",{
+        Token tokens[35];
+        char input[] = "set a = 1 | 0 in\nset b = (a & 1) in\nset c = b in\n(if a then b else c end | 0)\n";
+        int count = read_tokens(tokens, input , strlen(input)+1);
+        char show[25];
+        char expected[32][25] = ARRAY("SET", "IDENTIFIER(a)", "ASSIGNMENT_OPERATOR", "ON", "OR", "OFF", "STATEMENT_END",
+                                      "SET", "IDENTIFIER(b)", "ASSIGNMENT_OPERATOR", "GRP_OPEN", "IDENTIFIER(a)", "AND", "ON", "GRP_CLOSE", "STATEMENT_END",
+                                      "SET", "IDENTIFIER(c)", "ASSIGNMENT_OPERATOR", "IDENTIFIER(b)", "STATEMENT_END",
+                                      "GRP_OPEN", "IF", "IDENTIFIER(a)", "THEN", "IDENTIFIER(b)", "ELSE", "IDENTIFIER(c)", "END",  "OR", "OFF", "GRP_CLOSE");
+        ASSERT_INT_EQUALS(count, 32);
+        for(int i = 0; i < count; i++){
+            show_token(show, &tokens[i]) ;
+            ASSERT_STR_EQUALS(show ,expected[i]);
+        }
+    })
 })

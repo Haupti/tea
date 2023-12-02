@@ -90,6 +90,14 @@ void print_syntx_err_and_exit(SyntaxVerification verification){
                     printf("SYNTAX ERROR: no statement to end\n");
                     break;
                 }
+            case SYNTX_ERR_INCOMPLETE_CONDITIONAL:{
+                    printf("SYNTAX ERROR: conditional incomplete, token not expected here\n");
+                    break;
+                }
+            case SYNTX_ERR_NO_CONDITIONAL_TO_END:{
+                    printf("SYNTAX ERROR: end of conditional expression before start\n");
+                    break;
+                }
         }
         printf("SYNTAX ERROR: at token position %d\n", verification.result.error.at_position);
         exit(EXIT_FAILURE);
@@ -99,6 +107,7 @@ void print_syntx_err_and_exit(SyntaxVerification verification){
 SyntaxVerification verify_syntax(Token * tokens, size_t tokens_len){
     int bracket_counter = 0;
     int statement_brackets_counter = 0;
+    int if_expr_counter = 0;
     int consecutive_value_counter = 0;
     int consecutive_combinator_counter = 0;
     int consecutive_value_and_combinator_counter = 0;
@@ -183,8 +192,40 @@ SyntaxVerification verify_syntax(Token * tokens, size_t tokens_len){
                 consecutive_value_and_combinator_counter = 0;
                 break;
             }
+            case IF:{
+                if_expr_counter += 1;
+                consecutive_combinator_counter = 0;
+                consecutive_value_counter = 0;
+                consecutive_value_and_combinator_counter = 0;
+                break;
+            }
+            case THEN:{
+                if_expr_counter += 1;
+                consecutive_combinator_counter = 0;
+                consecutive_value_counter = 0;
+                consecutive_value_and_combinator_counter = 0;
+                break;
+            }
+            case ELSE:{
+                if_expr_counter += 1;
+                consecutive_combinator_counter = 0;
+                consecutive_value_counter = 0;
+                consecutive_value_and_combinator_counter = 0;
+                break;
+            }
+            case END:{
+                if_expr_counter -= 3;
+                consecutive_combinator_counter = 0;
+                consecutive_value_counter = 0;
+                consecutive_value_and_combinator_counter = 0;
+                break;
+            }
             default:
                 break;
+        }
+
+        if(if_expr_counter < 0){
+            return verification_with_error(SYNTX_ERR_NO_CONDITIONAL_TO_END, token, i);
         }
 
         if(statement_brackets_counter < 0){
@@ -211,6 +252,12 @@ SyntaxVerification verify_syntax(Token * tokens, size_t tokens_len){
             continue;
         }
 
+        if(token.type == IF || token.type == THEN || token.type == ELSE || token.type == END){
+            if(next_token->type == THEN || next_token->type == ELSE || next_token->type == END){
+                return verification_with_error(SYNTX_ERR_INCOMPLETE_CONDITIONAL, *next_token, i+1);
+            }
+        }
+
         if(is_statement_end(token) && is_combinator(*next_token)){
             return verification_with_error(SYNTX_ERR_NO_STATEMENT_BEFORE_COMBINATOR, *next_token, i+1);
         }
@@ -234,6 +281,10 @@ SyntaxVerification verify_syntax(Token * tokens, size_t tokens_len){
 
     if(statement_brackets_counter > 0){
         return verification_with_error(SYNTX_ERR_STATEMENT_DOESNT_END, token, i);
+    }
+
+    if(if_expr_counter > 0){
+        return verification_with_error(SYNTX_ERR_INCOMPLETE_CONDITIONAL, token, i);
     }
 
     return verification_without_error();

@@ -44,5 +44,17 @@ MODULAR_DESCRIBE(build_tree_tests,{
         Token tokens[] = ARRAY(new_token(IF), new_token(ON), new_token(THEN), new_token(ON), new_token(ELSE), new_token(OFF), new_token(END));
         Node node =  build_tree(tokens, 0, LEN(tokens));
         ASSERT_EQUALS(node.type, CONDITIONAL);
+        ASSERT_EQUALS(node.it.conditional.condition->type, LEAF);
+        ASSERT_EQUALS(node.it.conditional.then->type, LEAF);
+        ASSERT_EQUALS(node.it.conditional.otherwise->type, LEAF);
+    })
+    TEST("builds conditional node after assignment", {
+        Token tokens[] = ARRAY(new_token(SET), new_identifier_token("A"), new_token(ASSIGNMENT_OPERATOR), new_token(ON), new_token(STATEMENT_END),
+            new_token(IF), new_identifier_token("A"), new_token(THEN), new_token(ON), new_token(ELSE), new_token(OFF), new_token(END));
+        Node node =  build_tree(tokens, 0, LEN(tokens));
+        ASSERT_EQUALS(node.type, CONDITIONAL);
+        ASSERT_EQUALS(node.it.conditional.condition->type, IDENTIFIER_LEAF);
+        ASSERT_EQUALS(node.it.conditional.then->type, LEAF);
+        ASSERT_EQUALS(node.it.conditional.otherwise->type, LEAF);
     })
 })

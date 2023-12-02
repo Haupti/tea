@@ -15,4 +15,9 @@ MODULAR_DESCRIBE(acceptance_tests,{
         Value val = tea(prog, strlen(prog));
         ASSERT_EQUALS(val, VALUE_ON);
     })
+    TEST("evaluates with conditional", {
+        char prog[]  = "set a = 1 | 0 in\nset b = (a & 1) in\nset c = b in\n(if a then b else c end | 0)\n";
+        Value val = tea(prog, strlen(prog));
+        ASSERT_EQUALS(val, VALUE_ON);
+    })
 })

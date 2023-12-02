@@ -67,10 +67,10 @@ Node * build_node(Slice slice, NodeReference ** parent_node_references, int pare
 Node * build_conditional_node(Slice slice, NodeReference ** parent_node_references, int parent_node_references_count ){
     Slice if_then_body = find_bracket_slice(slice);
     Node * condition_node = build_node(if_then_body, parent_node_references, parent_node_references_count);
-    slice.end += 1;
+    slice.start = if_then_body.end + 1;
     Slice then_else_body = find_bracket_slice(slice);
     Node * then_node = build_node(then_else_body, parent_node_references, parent_node_references_count);
-    slice.end += 1;
+    slice.start = then_else_body.end + 1;
     Slice else_end_body = find_bracket_slice(slice);
     Node * else_node = build_node(else_end_body, parent_node_references, parent_node_references_count);
     Node * conditional = create_conditional(condition_node, then_node, else_node);

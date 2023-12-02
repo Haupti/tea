@@ -58,4 +58,10 @@ MODULAR_DESCRIBE(syntax_verify_tests,{
         ASSERT_INT_EQUALS(result.has_error, 1);
         ASSERT_EQUALS(result.result.error.error_type, SYNTX_ERR_TOO_MANY_TOKENS_IN_GROUP);
     })
+    TEST("verifies no missing end on conditional", {
+        Token tokens[] = ARRAY(new_token(IF), new_token(ON), new_token(THEN), new_token(OFF), new_token(ELSE), new_token(ON));
+        SyntaxVerification result = verify_syntax(tokens,5);
+        ASSERT_INT_EQUALS(result.has_error, 1);
+        ASSERT_EQUALS(result.result.error.error_type, SYNTX_ERR_INCOMPLETE_CONDITIONAL);
+    })
 })
