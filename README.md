@@ -15,11 +15,12 @@ and `1 | 1 & 0` raises an exception because its not properly grouped.\
 ## Future plans
 
 ### definitive plans
+* functions - these take arguments and return something
+* instructions/procedures or sth. - these may or may not take arguments but do not return something
+* lists or at least something like it, i have a slightly different idea for that
 * variables
 * update syntax checker when problem occurs
 * update sanity checker when problem occurs
-* functions
-* lists or at least something like it, i have a slightly different idea for that
 * io
 ### things i think about
 * using LLVM (not at the moment, i want to do it myself once)
