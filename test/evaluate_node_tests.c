@@ -12,7 +12,6 @@
 #include "../src/ast_evaluate.h"
 #include "../src/syntax_verify.h"
 #include "assert_helpers.h"
-#include "ast_builder_internal.h"
 
 Node new_top_level_leaf(Value value){
     return new_leaf(value);

@@ -3,6 +3,8 @@
 
 #include <stdlib.h>
 
+#define TOKEN_TYPE_STR(x) #x
+
 typedef enum TokenType {
     ON,
     OFF,

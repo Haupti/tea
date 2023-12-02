@@ -10,5 +10,5 @@
 set a = 1 | 0 in
 set b = (a & 1) in
 set c = b in
-a & (b | c)
+(if a then b else c end | 0)
 

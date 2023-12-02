@@ -59,7 +59,6 @@ MODULAR_DESCRIBE(read_tokens_tests,{
     TEST("reads value definition with additional stuff",{
         Token tokens[20];
         char input[] = "set b = (set a = 1 in !1 | 1) in b";
-        printf("STRLEN %lld\n", strlen(input));
         int count = read_tokens(tokens, input , strlen(input)+1);
         char show[25];
         char expected[16][25] = ARRAY("SET", "IDENTIFIER(b)", "ASSIGNMENT_OPERATOR", "GRP_OPEN", "SET", "IDENTIFIER(a)", "ASSIGNMENT_OPERATOR", "ON", "STATEMENT_END", "NOT", "ON", "OR", "ON", "GRP_CLOSE", "STATEMENT_END", "IDENTIFIER(b)");
@@ -72,7 +71,6 @@ MODULAR_DESCRIBE(read_tokens_tests,{
     TEST("reads conditional",{
         Token tokens[20];
         char input[] = "set a = 1 in if a then 0 else 1 end";
-        printf("STRLEN %lld\n", strlen(input));
         int count = read_tokens(tokens, input , strlen(input)+1);
         char show[25];
         char expected[12][25] = ARRAY("SET", "IDENTIFIER(a)", "ASSIGNMENT_OPERATOR", "ON", "STATEMENT_END", "IF", "IDENTIFIER(a)", "THEN", "OFF", "ELSE", "ON", "END");

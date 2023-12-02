@@ -7,6 +7,7 @@
 #include "err.h"
 #include "slice.h"
 #include "slice_utils.h"
+#include "bracket_finder.h"
 
 Value to_value(Token token){
     Value value;
@@ -40,37 +41,6 @@ Combinator to_combinator(Token token){
     return combinator;
 }
 
-// starting on group open
-Slice cut_group_slice_to_size(Slice slice){
-    if(slice.arr[slice.start].type != GRP_OPEN){
-        err("while cutting slice to size. im not at a group start");
-    }
-    int bracket_counter = 0;
-
-    Token token;
-    int i;
-    for(i = slice.start; i <= slice.end; i++){
-        token = slice.arr[i];
-        if(token.type == GRP_OPEN){
-            bracket_counter += 1;
-        }
-        if(token.type == GRP_CLOSE){
-            bracket_counter -= 1;
-        }
-        if(bracket_counter == 0){
-            break;
-        }
-    }
-    int grp_close_pos = i;
-
-    if(bracket_counter != 0){
-        err("while searching for matching ')'. not found within slice");
-    }
-
-    Slice group_slice = { slice.arr, slice.start+1, grp_close_pos-1};
-    return group_slice;
-}
-
 
 // returns the position of the combinator
 // or -1 if there is no combinator on the current level
@@ -92,11 +62,21 @@ int combinator_position(Slice slice){
     return combinator_position;
 }
 
-int is_allowed_token_after_assignments(Token token){
-    return is_value(token) || token.type == NOT || token.type == IDENTIFIER || is_grp_open(token);
+Node * build_node(Slice slice, NodeReference ** parent_node_references, int parent_node_references_count);
+
+Node * build_conditional_node(Slice slice, NodeReference ** parent_node_references, int parent_node_references_count ){
+    Slice if_then_body = find_bracket_slice(slice);
+    Node * condition_node = build_node(if_then_body, parent_node_references, parent_node_references_count);
+    slice.end += 1;
+    Slice then_else_body = find_bracket_slice(slice);
+    Node * then_node = build_node(then_else_body, parent_node_references, parent_node_references_count);
+    slice.end += 1;
+    Slice else_end_body = find_bracket_slice(slice);
+    Node * else_node = build_node(else_end_body, parent_node_references, parent_node_references_count);
+    Node * conditional = create_conditional(condition_node, then_node, else_node);
+    return conditional;
 }
 
-Node * build_node(Slice slice, NodeReference ** parent_node_references, int parent_node_references_count);
 
 // expects slice to only contain tokens of the node to create i.e. the assignments must be collected before calling this
 Node * create_from_unforked_body(Slice slice, NodeReference ** in_scope_node_references, int in_scope_node_references_count){
@@ -129,7 +109,7 @@ Node * create_from_unforked_body(Slice slice, NodeReference ** in_scope_node_ref
                 break;
             }
             else if(is_grp_open(current_token)){
-                Slice grp_body_slice = cut_group_slice_to_size(new_slice(slice.arr, current_token_pos, slice.end));
+                Slice grp_body_slice = find_bracket_slice(new_slice(slice.arr, current_token_pos, slice.end));
                 Node * node = build_node(grp_body_slice, in_scope_node_references, in_scope_node_references_count);
                 if(nots != 0){
                     return create_sprout(node, MODIFIER_NOT);
@@ -139,11 +119,25 @@ Node * create_from_unforked_body(Slice slice, NodeReference ** in_scope_node_ref
                 }
                 break;
             }
+            else if(current_token.type == IF){
+                Slice cond_start_slice = {slice.arr, current_token_pos, slice.end};
+                Node * cond_node =  build_conditional_node(cond_start_slice, in_scope_node_references, in_scope_node_references_count);
+                if(nots != 0){
+                    return create_sprout(cond_node, MODIFIER_NOT);
+                }
+                else {
+                    return cond_node;
+                }
+                break;
+            }
         }
         err("while building tree: expected a valid token");
         return NULL;
 }
 
+int is_allowed_token_after_assignments(Token token){
+    return is_value(token) || token.type == NOT || token.type == IDENTIFIER || is_grp_open(token) || token.type == IF;
+}
 
 Node * build_node(Slice slice, NodeReference ** parent_node_references, int parent_node_references_count){
 

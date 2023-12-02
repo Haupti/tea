@@ -18,6 +18,16 @@ NodeReference new_node_ref(char * name, Node * node){
     return named_object;
 }
 
+Node * create_conditional(Node * condition, Node * then, Node * otherwise){
+    Node conditional = new_conditional(condition, then, otherwise);
+    Node * conditional_ptr = malloc(sizeof(Node));
+    if(conditional_ptr == NULL){
+        err("cannot allocate space for node");
+    }
+    memcpy(conditional_ptr, &conditional, sizeof(Node));
+    return conditional_ptr;
+}
+
 Node * create_fork(Node * left, Node * right, Combinator combinator){
     Node fork = new_fork(left, right, combinator);
     Node * fork_ptr = malloc(sizeof(Node));
@@ -56,6 +66,14 @@ Node * create_sprout(Node * leaf, Modifier modifier){
     }
     memcpy(sprout_ptr, &sprout, sizeof(Node));
     return sprout_ptr;
+}
+
+Node new_conditional(Node * condition, Node * then, Node * otherwise){
+    Conditional conditional = { condition, then, otherwise };
+    union NodeI node_i;
+    node_i.conditional = conditional;
+    Node node = { CONDITIONAL, node_i };
+    return node;
 }
 
 Node new_leaf(Value value){

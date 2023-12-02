@@ -85,10 +85,12 @@ typedef struct Node {
 } Node;
 
 
+Node * create_conditional(Node * condition, Node * then, Node * otherwise);
 Node * create_leaf(Value value);
 Node * create_identifier_leaf(char * identifier_name, NodeReference ** in_scope_node_refs, int in_scope_refs_count);
 Node * create_sprout(Node * leaf, Modifier modifier);
 Node * create_fork(Node * left, Node * right, Combinator combinator);
+Node new_conditional(Node * condition, Node * then, Node * otherwise);
 Node new_leaf(Value value);
 Node new_identifier_leaf(char * identifier_name, NodeReference ** in_scope_node_refs, int in_scope_node_refs_count);
 Node new_sprout(Node * tip, Modifier modifier);
