@@ -3,6 +3,35 @@
 #include <string.h>
 #include "err.h"
 
+FunctionScope * create_function_scope(Function ** functions, int functions_count){
+    FunctionScope scope = { functions, functions_count };
+    FunctionScope * ptr = malloc(sizeof(FunctionScope));
+    if(ptr == NULL){
+        err("cannot allocate space for scope");
+    }
+    memcpy(ptr, &scope , sizeof(FunctionScope));
+    return ptr;
+}
+
+LeafScope * create_leaf_scope(NodeReference ** node_refs, int node_refs_count, char ** function_params, int function_params_count){
+    LeafScope scope = { node_refs, node_refs_count, function_params, function_params_count};
+    LeafScope * ptr = malloc(sizeof(LeafScope));
+    if(ptr == NULL){
+        err("cannot allocate space for scope");
+    }
+    memcpy(ptr, &scope , sizeof(LeafScope));
+    return ptr;
+}
+Node * create_function_call_node(char * name, Node ** params, int params_count, FunctionScope * function_scope){
+    Node node = new_function_call_node(name, params, params_count, function_scope);
+    Node * ptr = malloc(sizeof(Node));
+    if(ptr == NULL){
+        err("cannot allocate space for node");
+    }
+    memcpy(ptr, &node , sizeof(Node));
+    return ptr;
+}
+
 NodeReference * create_node_ref(char * name, Node * ref){
     NodeReference node_ref = new_node_ref(name, ref);
     NodeReference * node_ref_ptr = malloc(sizeof(NodeReference));
@@ -11,6 +40,16 @@ NodeReference * create_node_ref(char * name, Node * ref){
     }
     memcpy(node_ref_ptr, &node_ref , sizeof(NodeReference));
     return node_ref_ptr;
+}
+
+Function * create_function(char * function_identifier, char ** arg_names, int args_count, Node * body){
+    Function function = {arg_names, args_count, function_identifier, body};
+    Function * ptr = malloc(sizeof(Function));
+    if(ptr == NULL){
+        err("cannot allocate space for node");
+    }
+    memcpy(ptr, &function , sizeof(Function));
+    return ptr;
 }
 
 NodeReference new_node_ref(char * name, Node * node){
@@ -38,8 +77,8 @@ Node * create_fork(Node * left, Node * right, Combinator combinator){
     return fork_ptr;
 }
 
-Node * create_identifier_leaf(char * identifier_name, NodeReference ** in_scope_node_refs, int in_scope_node_refs_count){
-    Node leaf = new_identifier_leaf(identifier_name, in_scope_node_refs, in_scope_node_refs_count);
+Node * create_identifier_leaf(char * identifier_name, LeafScope * leaf_scope){
+    Node leaf = new_identifier_leaf(identifier_name, leaf_scope);
     Node * leaf_ptr = malloc(sizeof(Node));
     if(leaf_ptr == NULL){
         err("cannot allocate space for node");
@@ -68,6 +107,15 @@ Node * create_sprout(Node * leaf, Modifier modifier){
     return sprout_ptr;
 }
 
+
+Node new_function_call_node(char * name, Node ** params, int params_count, FunctionScope * function_scope){
+    FunctionCallNode function_call_node = { name, params, params_count, function_scope};
+    union NodeI node_i;
+    node_i.function_call = function_call_node;
+    Node node = { FUNCTION_CALL_NODE, node_i };
+    return node;
+}
+
 Node new_conditional(Node * condition, Node * then, Node * otherwise){
     Conditional conditional = { condition, then, otherwise };
     union NodeI node_i;
@@ -84,8 +132,8 @@ Node new_leaf(Value value){
     return node;
 }
 
-Node new_identifier_leaf(char * identifier_name, NodeReference ** in_scope_node_refs, int ins_scope_node_refs_count){
-    IdentifierLeaf identifier_leaf = { identifier_name, in_scope_node_refs, ins_scope_node_refs_count };
+Node new_identifier_leaf(char * identifier_name, LeafScope * leaf_scope){
+    IdentifierLeaf identifier_leaf = { identifier_name, leaf_scope };
     union NodeI node_i;
     node_i.id_leaf = identifier_leaf;
     Node node = { IDENTIFIER_LEAF, node_i};
@@ -171,12 +219,7 @@ void print_tree(Node node){
         case FUNCTION_CALL_NODE:
             {
                 FunctionCallNode call = node.it.function_call;
-                printf("FUNCTION CALL %s", call.function_identifier);
-                break;
-            }
-        case FUNCTION_PARAM_LEAF:
-            {
-                printf("IDENTIFIER (fnparam) (%s)", node.it.fn_param_leaf.name);
+                printf("(FUNCTION CALL %s)", call.function_identifier);
                 break;
             }
     }

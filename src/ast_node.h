@@ -3,7 +3,7 @@
 
 #include "token.h"
 
-#define NODE_TYPE_STR(x) (x == LEAF ? "LEAF" : (x == FORK ? "FORK" : (x == SPROUT ? "SPROUT" : (x == IDENTIFIER_LEAF ? "IDENTIFIER_LEAF" : ""))))
+#define NODE_TYPE_STR(x) (x == LEAF ? "LEAF" : (x == FORK ? "FORK" : (x == SPROUT ? "SPROUT" : (x == IDENTIFIER_LEAF ? "IDENTIFIER_LEAF" : (x == FUNCTION_CALL_NODE ? "FUNCTION_CALL_NODE" : "")))))
 
 typedef enum Value {
     VALUE_ON,
@@ -23,6 +23,8 @@ typedef enum Modifier {
 
 
 struct Node;
+struct LeafScope;
+struct FunctionScope;
 
 
 typedef enum NodeReferenceType {
@@ -49,22 +51,14 @@ typedef struct Leaf {
 
 typedef struct IdentifierLeaf {
     char * name;
-    struct NodeReference ** in_scope_node_refs;
-    int in_scope_node_refs_count;
+    struct LeafScope * leaf_scope;
 } IdentifierLeaf;
 
-// has nothing in scope, because the scope is only defined on function call
-typedef struct FunctionParamLeaf {
-    char * name;
-} FunctionParamLeaf;
-
-// has scope to determine and evaluate the parameters and insert these into the function
 typedef struct FunctionCallNode {
     char * function_identifier;
     struct Node ** params;
     int params_count;
-    struct Function ** functions;
-    int functions_count;
+    struct FunctionScope * function_scope;
 } FunctionCallNode;
 
 typedef struct Sprout {
@@ -87,7 +81,6 @@ typedef struct Conditional {
 union NodeI {
     struct Leaf leaf;
     struct IdentifierLeaf id_leaf;
-    struct FunctionParamLeaf fn_param_leaf;
     struct Sprout sprout;
     struct Fork fork;
     struct Conditional conditional;
@@ -101,7 +94,6 @@ typedef enum NodeType {
     SPROUT,
     CONDITIONAL,
     FUNCTION_CALL_NODE,
-    FUNCTION_PARAM_LEAF,
 } NodeType;
 
 typedef struct Node {
@@ -109,18 +101,36 @@ typedef struct Node {
     union NodeI it;
 } Node;
 
+typedef struct LeafScope {
+    NodeReference ** scope_node_references;
+    int scope_node_references_count;
+    char ** function_scope_params;
+    int function_scope_params_count;
+} LeafScope;
+
+typedef struct FunctionScope {
+    struct Function ** functions;
+    int functions_count;
+} FunctionScope;
+
 
 Node * create_conditional(Node * condition, Node * then, Node * otherwise);
 Node * create_leaf(Value value);
-Node * create_identifier_leaf(char * identifier_name, NodeReference ** in_scope_node_refs, int in_scope_refs_count);
+Node * create_identifier_leaf(char * identifier_name, LeafScope * leaf_scope);
 Node * create_sprout(Node * leaf, Modifier modifier);
 Node * create_fork(Node * left, Node * right, Combinator combinator);
+Node * create_function_call_node(char * name, Node ** params, int params_count, FunctionScope * function_scope);
+
+Node new_function_call_node(char * name, Node ** params, int params_count, FunctionScope * function_scope);
 Node new_conditional(Node * condition, Node * then, Node * otherwise);
 Node new_leaf(Value value);
-Node new_identifier_leaf(char * identifier_name, NodeReference ** in_scope_node_refs, int in_scope_node_refs_count);
+Node new_identifier_leaf(char * identifier_name, LeafScope * leaf_scope);
 Node new_sprout(Node * tip, Modifier modifier);
 Node new_fork(Node * left, Node * right, Combinator combinator);
 
+LeafScope * create_leaf_scope(NodeReference ** node_refs, int node_refs_count, char ** function_params, int function_params_count);
+FunctionScope * create_function_scope(Function ** functions, int functions_count);
+Function * create_function(char * function_identifier, char ** arg_names, int args_count, Node * body);
 NodeReference * create_node_ref(char * name, Node * ref);
 NodeReference new_node_ref(char * name, Node * node);
 void print_identifier_leaf(IdentifierLeaf object);

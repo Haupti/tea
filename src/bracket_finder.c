@@ -22,6 +22,12 @@ Slice find_bracket_slice(Slice slice) {
         case ELSE:
             br_close_t = END;
             break;
+        case DEFINE:
+            br_close_t = DEFINE_AS;
+            break;
+        case DEFINE_AS:
+            br_close_t = DONE;
+            break;
         default:
             err("cant seach for bracket, this is not the start of one");
     }

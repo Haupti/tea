@@ -107,4 +107,16 @@ MODULAR_DESCRIBE(read_tokens_tests,{
             ASSERT_STR_EQUALS(show ,expected[i]);
         }
     })
+    TEST("reads function definition and usage",{
+        Token tokens[35];
+        char input[] = "define funcname a b as a | b done\nfuncname 1 0\n";
+        int count = read_tokens(tokens, input , strlen(input)+1);
+        char show[25];
+        char expected[12][25] = ARRAY("DEFINE", "IDENTIFIER(funcname)", "IDENTIFIER(a)", "IDENTIFIER(b)", "DEFINE_AS", "IDENTIFIER(a)", "OR", "IDENTIFIER(b)", "DONE", "IDENTIFIER(funcname)", "ON", "OFF");
+        ASSERT_INT_EQUALS(count, 12);
+        for(int i = 0; i < count; i++){
+            show_token(show, &tokens[i]) ;
+            ASSERT_STR_EQUALS(show ,expected[i]);
+        }
+    })
 })

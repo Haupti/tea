@@ -43,7 +43,7 @@ MODULAR_DESCRIBE(build_tree_tests,{
     })
     TEST("builds conditional node", {
         Token tokens[] = ARRAY(new_token(IF), new_token(ON), new_token(THEN), new_token(ON), new_token(ELSE), new_token(OFF), new_token(END));
-        Node node =  build_tree(tokens, 0, LEN(tokens));
+        Node node =  build_tree(tokens, 0, LEN(tokens)-1);
         ASSERT_EQUALS(node.type, CONDITIONAL);
         ASSERT_EQUALS(node.it.conditional.condition->type, LEAF);
         ASSERT_EQUALS(node.it.conditional.then->type, LEAF);
@@ -52,7 +52,7 @@ MODULAR_DESCRIBE(build_tree_tests,{
     TEST("builds conditional node after assignment", {
         Token tokens[] = ARRAY(new_token(SET), new_identifier_token("A"), new_token(ASSIGNMENT_OPERATOR), new_token(ON), new_token(STATEMENT_END),
             new_token(IF), new_identifier_token("A"), new_token(THEN), new_token(ON), new_token(ELSE), new_token(OFF), new_token(END));
-        Node node =  build_tree(tokens, 0, LEN(tokens));
+        Node node =  build_tree(tokens, 0, LEN(tokens)-1);
         ASSERT_EQUALS(node.type, CONDITIONAL);
         ASSERT_EQUALS(node.it.conditional.condition->type, IDENTIFIER_LEAF);
         ASSERT_EQUALS(node.it.conditional.then->type, LEAF);
@@ -61,7 +61,7 @@ MODULAR_DESCRIBE(build_tree_tests,{
     TEST("builds function definition and call", {
         Token tokens[] = ARRAY(new_token(DEFINE), new_identifier_token("funcname"), new_identifier_token("a"), new_identifier_token("b"), new_token(DEFINE_AS),
             new_identifier_token("a"), new_token(OR), new_identifier_token("b"), new_token(DONE), new_identifier_token("funcname"), new_token(ON), new_token(OFF));
-        Node node =  build_tree(tokens, 0, LEN(tokens));
+        Node node =  build_tree(tokens, 0, LEN(tokens)-1);
         // node itself
         ASSERT_EQUALS(node.type, FUNCTION_CALL_NODE);
         ASSERT_STR_EQUALS(node.it.function_call.function_identifier, "funcname");
@@ -70,16 +70,18 @@ MODULAR_DESCRIBE(build_tree_tests,{
         ASSERT_EQUALS(node.it.function_call.params[1]->type, LEAF);
 
         // function
-        ASSERT_INT_EQUALS(node.it.function_call.functions_count, 1);
-        Function function = *node.it.function_call.functions[0];
+        FunctionScope * scope =node.it.function_call.function_scope;
+        ASSERT_NOT_EQUALS(scope, NULL);
+        ASSERT_INT_EQUALS(node.it.function_call.function_scope->functions_count, 1);
+        Function function = *node.it.function_call.function_scope->functions[0];
         ASSERT_STR_EQUALS(function.function_identifier, "funcname");
         ASSERT_INT_EQUALS(function.args_count, 2);
         ASSERT_STR_EQUALS(function.arg_names[0], "a");
-        ASSERT_STR_EQUALS(function.arg_names[0], "b");
+        ASSERT_STR_EQUALS(function.arg_names[1], "b");
         ASSERT_EQUALS(function.body->type, FORK);
-        ASSERT_EQUALS(function.body->it.fork.left->type, FUNCTION_PARAM_LEAF);
-        ASSERT_STR_EQUALS(function.body->it.fork.left->it.fn_param_leaf.name, "a");
-        ASSERT_EQUALS(function.body->it.fork.right->type, FUNCTION_PARAM_LEAF);
-        ASSERT_STR_EQUALS(function.body->it.fork.right->it.fn_param_leaf.name, "b");
+        ASSERT_EQUALS(function.body->it.fork.left->type, IDENTIFIER_LEAF);
+        ASSERT_STR_EQUALS(function.body->it.fork.left->it.id_leaf.name, "a");
+        ASSERT_EQUALS(function.body->it.fork.right->type, IDENTIFIER_LEAF);
+        ASSERT_STR_EQUALS(function.body->it.fork.right->it.id_leaf.name, "b");
     })
 })

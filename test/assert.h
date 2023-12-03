@@ -55,6 +55,16 @@
     }\
 }
 
+#define ASSERT_NOT_EQUALS(x,y) {\
+    assertion_count += 1;\
+    if(x==y){\
+        failure_count += 1;\
+        printf(COLOR_RED);\
+        printf("    FAILURE IN TEST \"%s\". failed in assertion %d: expected "#x" not to be "#y", but was.\n", test_name, assertion_count);\
+        printf(COLOR_RESET);\
+    }\
+}
+
 #define ASSERT_EQUALS(x,y) {\
     assertion_count += 1;\
     if(x!=y){\

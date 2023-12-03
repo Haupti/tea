@@ -3,6 +3,11 @@
 
 #include "ast_node.h"
 
-Value evaluate_node(Node * node);
+typedef struct {
+    Node ** params;
+    int params_count;
+} ParamScope;
+
+Value evaluate_node(Node * node, ParamScope param_scope);
 
 #endif
