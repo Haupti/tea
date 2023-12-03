@@ -1,5 +1,7 @@
 define fnname a b as
-    a & b
+    set c = 0 in
+    ((a & b) | c)
 done
 
-fnname 1 1
+set c = 1 in
+fnname 1 c
