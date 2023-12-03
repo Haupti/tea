@@ -225,7 +225,7 @@ Function * create_function_within(Slice slice, int * fn_def_end_target, BuildSco
     //  collect params
     Slice function_name_params_slice = find_bracket_slice(slice);
     int params_count = (function_name_params_slice.end - function_name_params_slice.start);
-    char * params[params_count];
+    char ** params = malloc(sizeof(char*) * params_count);
     int params_index = 0;
     // add new params
     for(int i = function_name_params_slice.start + 1; i <= function_name_params_slice.end; i++){
@@ -237,7 +237,9 @@ Function * create_function_within(Slice slice, int * fn_def_end_target, BuildSco
     Slice slice_from_define_as = {slice.arr, function_name_params_slice.end + 1, slice.end};
     Slice function_body_slice = find_bracket_slice(slice_from_define_as);
     *fn_def_end_target = function_body_slice.end + 1;
-    Node * body = build_node(function_body_slice, build_scope);
+
+    BuildScope build_scope_with_params = {build_scope.node_refs, build_scope.node_refs_count, params, params_count, build_scope.functions, build_scope.functions_count};
+    Node * body = build_node(function_body_slice, build_scope_with_params);
 
     return create_function(function_name_params_slice.arr[function_name_params_slice.start].name, params, params_count, body);
 }

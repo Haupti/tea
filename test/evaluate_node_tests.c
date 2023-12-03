@@ -17,17 +17,19 @@ Node new_top_level_leaf(Value value){
     return new_leaf(value);
 }
 
+ParamScope empty = { NULL, 0};
+
 MODULAR_DESCRIBE(evaluate_node_tests, {
     TEST("evaluates leaf",{
         Node node = new_top_level_leaf(VALUE_ON);
-        Value value = evaluate_node(&node);
+        Value value = evaluate_node(&node, empty);
         ASSERT_EQUALS(value, VALUE_ON);
     })
     TEST("evaluates flat fork",{
         Node left = new_top_level_leaf(VALUE_ON);
         Node right = new_top_level_leaf(VALUE_OFF);
         Node node = new_fork(&left, &right, COMBINATOR_AND);
-        Value value = evaluate_node(&node);
+        Value value = evaluate_node(&node, empty);
         ASSERT_EQUALS(value, VALUE_OFF);
     })
     TEST("evaluates nested fork (left is leaf)",{
@@ -40,7 +42,7 @@ MODULAR_DESCRIBE(evaluate_node_tests, {
 
         Node node = new_fork(&left, &node_d1, COMBINATOR_AND);
 
-        Value value = evaluate_node(&node);
+        Value value = evaluate_node(&node, empty);
         ASSERT_EQUALS(value, VALUE_ON);
     })
     TEST("evaluates nested fork (right is leaf)",{
@@ -53,7 +55,7 @@ MODULAR_DESCRIBE(evaluate_node_tests, {
 
         Node node = new_fork(&node_d1, &right, COMBINATOR_AND);
 
-        Value value = evaluate_node(&node);
+        Value value = evaluate_node(&node, empty);
         ASSERT_EQUALS(value, VALUE_ON);
     })
     TEST("evaluates conditional",{
@@ -64,7 +66,7 @@ MODULAR_DESCRIBE(evaluate_node_tests, {
 
         Node conditional = new_conditional(&condition, &then, &otherwise);
 
-        Value value = evaluate_node(&conditional);
+        Value value = evaluate_node(&conditional, empty);
         ASSERT_EQUALS(value, VALUE_OFF);
     })
 })
