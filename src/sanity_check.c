@@ -82,13 +82,26 @@ SanityCheck perform_sanity_check(Slice slice){
             assigned_identifies[assigned_identifies_index] = pair;
             assigned_identifies_index += 1;
         }
-        if(token.type == IDENTIFIER && ((i != slice.start && slice.arr[i-1].type != SET) || i == slice.start)){
+        else if(token.type == DEFINE){
+
+            IdentifierIndexPair pair = { slice.arr[i+1].name, i+1};
+            assigned_identifies[assigned_identifies_index] = pair;
+            assigned_identifies_index += 1;
+            for(int j = i; j <= slice.end; j++){
+                if(slice.arr[j].type == DONE){
+                    i = j;
+                    break;
+                }
+            }
+        }
+        else if(token.type == IDENTIFIER && ((i != slice.start && slice.arr[i-1].type != SET) || i == slice.start)){
             IdentifierIndexPair pair = {token.name, i};
             uses_identifiers[uses_identifiers_index] = pair;
             uses_identifiers_index += 1;
         }
 
     }
+
     // search for duplicates
     int j;
     int k;

@@ -114,9 +114,9 @@ SyntaxVerification verify_syntax(Token * tokens, size_t tokens_len){
     int bracket_counter = 0;
     int statement_brackets_counter = 0;
     int if_expr_counter = 0;
-    int consecutive_value_counter = 0;
+    int define_counter = 0;
+    int is_in_definition_block = 0;
     int consecutive_combinator_counter = 0;
-    int consecutive_value_and_combinator_counter = 0;
 
     int i;
     Token token;
@@ -135,95 +135,93 @@ SyntaxVerification verify_syntax(Token * tokens, size_t tokens_len){
 
         switch(token.type){
             case ON:{
-                consecutive_value_counter += 1;
+                if(is_in_definition_block){
+                    break;
+                }
                 consecutive_combinator_counter = 0;
-                consecutive_value_and_combinator_counter += 1;
                 break;
             }
             case OFF:{
-                consecutive_value_counter += 1;
+                if(is_in_definition_block){
+                    break;
+                }
                 consecutive_combinator_counter = 0;
-                consecutive_value_and_combinator_counter += 1;
                 break;
             }
             case IDENTIFIER:{
-                consecutive_value_counter += 1;
+                if(is_in_definition_block){
+                    break;
+                }
                 consecutive_combinator_counter = 0;
-                consecutive_value_and_combinator_counter += 1;
                 break;
             }
             case AND:{
                 consecutive_combinator_counter += 1;
-                consecutive_value_counter = 0;
-                consecutive_value_and_combinator_counter += 1;
                 break;
             }
             case OR:{
                 consecutive_combinator_counter += 1;
-                consecutive_value_counter = 0;
-                consecutive_value_and_combinator_counter += 1;
                 break;
             }
             case GRP_CLOSE:{
                 bracket_counter -= 1;
-                consecutive_value_counter = 0;
                 consecutive_combinator_counter = 0;
-                consecutive_value_and_combinator_counter = 0;
                 break;
             }
             case GRP_OPEN:{
                 bracket_counter += 1;
-                consecutive_value_counter = 0;
                 consecutive_combinator_counter = 0;
-                consecutive_value_and_combinator_counter = 0;
                 break;
             }
             case SET:{
                 statement_brackets_counter += 1;
-                consecutive_value_counter = 0;
                 consecutive_combinator_counter = 0;
-                consecutive_value_and_combinator_counter = 0;
                 break;
             }
             case STATEMENT_END:{
                 statement_brackets_counter -= 1;
-                consecutive_value_counter = 0;
                 consecutive_combinator_counter = 0;
-                consecutive_value_and_combinator_counter = 0;
                 break;
             }
             case ASSIGNMENT_OPERATOR:{
                 consecutive_combinator_counter = 0;
-                consecutive_value_counter = 0;
-                consecutive_value_and_combinator_counter = 0;
                 break;
             }
             case IF:{
                 if_expr_counter += 1;
                 consecutive_combinator_counter = 0;
-                consecutive_value_counter = 0;
-                consecutive_value_and_combinator_counter = 0;
                 break;
             }
             case THEN:{
                 if_expr_counter += 1;
                 consecutive_combinator_counter = 0;
-                consecutive_value_counter = 0;
-                consecutive_value_and_combinator_counter = 0;
                 break;
             }
             case ELSE:{
                 if_expr_counter += 1;
                 consecutive_combinator_counter = 0;
-                consecutive_value_counter = 0;
-                consecutive_value_and_combinator_counter = 0;
                 break;
             }
             case END:{
                 if_expr_counter -= 3;
                 consecutive_combinator_counter = 0;
-                consecutive_value_counter = 0;
-                consecutive_value_and_combinator_counter = 0;
+                break;
+            }
+            case DEFINE:{
+                define_counter += 1;
+                is_in_definition_block = 1;
+                consecutive_combinator_counter = 0;
+                break;
+            }
+            case DEFINE_AS:{
+                define_counter += 1;
+                is_in_definition_block = 0;
+                consecutive_combinator_counter = 0;
+                break;
+            }
+            case DONE:{
+                define_counter -= 2;
+                consecutive_combinator_counter = 0;
                 break;
             }
             default:
@@ -242,16 +240,8 @@ SyntaxVerification verify_syntax(Token * tokens, size_t tokens_len){
             return verification_with_error(SYNTX_ERR_NO_GROUP_TO_CLOSE, token, i);
         }
 
-        if(consecutive_value_counter > 1){
-            return verification_with_error(SYNTX_ERR_COMBINATOR_MISSING, token, i);
-        }
-
         if(consecutive_combinator_counter > 1){
             return verification_with_error(SYNTX_ERR_VALUE_MISSING, token, i);
-        }
-
-        if(consecutive_value_and_combinator_counter > 3){
-            return verification_with_error(SYNTX_ERR_TOO_MANY_TOKENS_IN_GROUP, token, i);
         }
 
         if(!next_exists){

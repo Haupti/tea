@@ -97,13 +97,6 @@ Value evaluate_identifier_leaf(IdentifierLeaf leaf, ParamScope param_scope){
             return evaluate_node(node_refs[i]->ref, param_scope);
         }
     }
-    printf("param_scope count: %d\n", param_scope.params_count);
-    printf("param_scope param 1 == null: %d\n", param_scope.params[0] == NULL);
-    printf("param_scope param 2 == null: %d\n", param_scope.params[1] == NULL);
-
-    printf("leaf scope count: %d\n", leaf.leaf_scope->function_scope_params_count);
-    printf("leaf scope param 1 == null: %d\n", leaf.leaf_scope->function_scope_params[0] == NULL);
-    printf("leaf scope param 2 == null: %d\n", leaf.leaf_scope->function_scope_params[1] == NULL);
     for(int i = 0; i < param_scope.params_count; i++){
         if(strcmp(leaf.leaf_scope->function_scope_params[i], leaf.name) == 0){
             ParamScope empty = { NULL, 0};
