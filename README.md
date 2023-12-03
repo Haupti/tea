@@ -33,6 +33,7 @@ and `1 | 1 & 0` raises an exception because its not properly grouped.\
 * **0.0.5** reimplement the algorith again: it actually works correctly now and is easier to understand
 * **0.0.6** add sanity checker so more problems are 'pre-execution time errors' (see long description)
 * **0.0.7** add support conditional statement `if 0 then 1 else 0 end`
+* **0.1.0** add functions ... however see long description
 
 ## version feature list (long)
 ### 0.0.6
@@ -53,3 +54,11 @@ however, it works in several phases:
 4. building the binary tree starting from the entrypoint
 5. THEN the tree is evaluated
 so when i write 'pre-execution time' i mean any phase before actuall evaluating the tree.
+
+## 0.1.0
+functions work but to make it work i had to heavily cut from the syntax verifier\
+i do not like that.\
+also i did not add additional verifications for functions.\
+that basically means: if you do it right, it will work. if you do it wrong, you will probably not be wared beforehand\
+and either get an error that basically tells you nothing OR you will get some random wrong result\
+
